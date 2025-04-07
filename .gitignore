@@ -1,0 +1,13 @@
+# Ignore large image directories
+images_scraped/
+
+# macOS junk
+.DS_Store
+
+# Logs or temp files
+*.log
+*.tmp
+
+# Node or Python (if added later)
+node_modules/
+__pycache__/

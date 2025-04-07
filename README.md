@@ -55,8 +55,6 @@ Or use VS Code's "Live Server" extension.
 ```bash
 cd curated_collection
 git init
-git remote add origin <your-repo-url>
-git add .
 git commit -m "Initial build from modular prompts"
 git push -u origin main
 ```

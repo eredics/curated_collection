@@ -1,51 +1,86 @@
-# 🚀 Deployment Instructions: Curated Collection
+# 🚀 GitHub Deployment Guide: Federation Gallery (Claude Project)
 
-This guide walks you through creating a GitHub repo and cloning it locally to manage your Claude-powered gallery project.
-
----
-
-## 🧰 Goal:
-Create and connect your GitHub repo to your local build directory.
+This guide walks you through resetting your GitHub repository and connecting it to your existing Claude project files.
 
 ---
 
-## 🪜 Step-by-Step Instructions
+## ✅ Assumptions
 
-### 🔹 Step 1: Create the GitHub Repo
-1. Visit: https://github.com/new
-2. Name it: `curated_collection` (or your choice)
-3. Set visibility: Public or Private
-4. **DO NOT** initialize with README, license, or .gitignore
-5. Click "Create repository"
+- Your Claude project already exists locally with folders, source data, and code.
+- You previously created a GitHub repo here:  
+  🔗 https://github.com/eredics/curated_collection (this will be deleted)
+- You will recreate the repo with the same name: `curated_collection`
+- Your **local project will live here**:  
+  📂 `/Users/pete5553/Documents/Projects/curated_collection`
 
 ---
 
-### 🔹 Step 2: Clone the Repo Locally
-Run this command in your terminal:
+## 🧹 Step 1: Delete the Existing GitHub Repo
+
+1. Go to: https://github.com/eredics/curated_collection
+2. Click **Settings**
+3. Scroll to the **Danger Zone**
+4. Click **Delete this repository**
+5. Type `eredics/curated_collection` to confirm
+
+---
+
+## 🆕 Step 2: Create the New GitHub Repo
+
+1. Go to: https://github.com/new
+2. Name the repository: `curated_collection`
+3. Leave it **empty**: ❌ No README, license, or .gitignore
+4. Choose visibility: Public or Private
+5. Click **Create repository**
+
+---
+
+## 📦 Step 3: Prepare Your Local Folder
+
+1. Move your Claude build into the working project directory:
 
 ```bash
-git clone https://github.com/your-username/curated_collection.git
+mkdir -p /Users/pete5553/Documents/Projects
+mv ~/Downloads/curated_collection /Users/pete5553/Documents/Projects/
+cd /Users/pete5553/Documents/Projects/curated_collection
+```
+
+2. Initialize Git and set the remote:
+
+```bash
+git init
+git remote add origin https://github.com/eredics/curated_collection.git
 ```
 
 ---
 
-### 🔹 Step 3: Stage + Commit Your Files
+## ✅ Step 4: Add, Commit, and Push to GitHub
+
 ```bash
-cd curated_collection
 git add .
-git commit -m "Initial build from Claude modular prompts"
+git commit -m "Initial Claude modular build"
+git branch -M main
+git push -u origin main
 ```
 
 ---
 
-### 🔹 Step 4: Push to GitHub
-```bash
-git push origin main
+## 🧠 Tip: Avoid Uploading 10,000+ Images
+
+To avoid bloating the repo:
+1. Add this to `.gitignore`:
+
 ```
+images_scraped/
+```
+
+2. Then commit and push without that folder.
 
 ---
 
-## ✅ Done!
-Your Claude modular gallery is now version-controlled and hosted on GitHub.
+## 🎉 Done!
 
-Use VS Code with Copilot Chat + Claude Sonnet to continue developing module-by-module.
+Your Claude project is now:
+- Backed up on GitHub
+- Located in a logical local folder
+- Ready for Copilot and Claude modular development
