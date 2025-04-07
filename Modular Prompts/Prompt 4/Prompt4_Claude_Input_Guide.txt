@@ -1,0 +1,27 @@
+# Claude + GitHub Copilot Chat Recipe
+## Prompt 4: UI Refinement & Visual Design
+
+---
+
+### STEP-BY-STEP USAGE
+
+1. Open index.html and styles.css.
+2. Paste a Prompt 4 module into Claude Chat.
+3. Ask Claude:
+   - "Improve the visual hierarchy using better typography and layout."
+   - "Add subtle, elegant transitions to this interaction."
+   - "Keep performance and accessibility in mind."
+
+---
+
+### MODULE OVERVIEW
+
+- 01: Sophisticated typography and balanced color palette
+- 02: Transitions and subtle animations for interactivity
+
+---
+
+### Claude Tips:
+- Ask Claude to use Google Fonts with fallbacks.
+- Request fade-ins and smooth transforms.
+- Confirm that contrast and accessibility are respected.

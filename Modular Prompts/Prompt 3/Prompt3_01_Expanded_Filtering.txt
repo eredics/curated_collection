@@ -1,0 +1,12 @@
+## MODULE 01: EXPANDED FILTERING (INSTRUCTION-BASED)
+
+- Extend the filter panel with these new dropdown filters:
+  - Movement (AI_Movement)
+  - Genre (AI_Genre)
+  - Style Period (AI_Style_Period)
+  - Form (AI_Form)
+  - Framed / Unframed toggle
+
+- All filters must support AND-combined logic (must match all active filters)
+
+- Dynamically update a visible filter count indicator when filters are active

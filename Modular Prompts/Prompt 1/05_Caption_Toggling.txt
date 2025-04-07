@@ -1,0 +1,10 @@
+## MODULE 05: CAPTION TOGGLING (INSTRUCTION-BASED)
+
+- Add a button or icon to each artwork item to toggle the visibility of the caption
+
+- Captions must:
+  - Be hidden by default
+  - Become visible when toggled
+  - Be accessible using keyboard controls (Enter or Space)
+
+- Use event delegation for efficiency when toggling captions

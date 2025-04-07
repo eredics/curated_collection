@@ -1,0 +1,14 @@
+## MODULE 03: DATA PARSING AND IMAGES (INSTRUCTION-BASED)
+
+- Load artwork data from the filtered CSV
+  (/Users/pete5553/Desktop/curated_collection/data/filtered.csv)
+
+- Use Papa Parse to parse the CSV
+
+Required fields:
+- ID, Title, Artist, Technique, Price, Size, Framed_Size, AI_Description, FG_Description, URL
+
+Image Handling:
+- Use images from ./images_scraped/{ID}.jpg
+- Show placeholder if image is missing
+- Display "Framed Size:" or fallback to "Size:"

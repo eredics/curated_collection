@@ -1,0 +1,10 @@
+## MODULE 02: FRAME SHARE & DOWNLOAD (INSTRUCTION-BASED)
+
+- Inside the frame modal, allow the user to:
+
+  - Download the framed artwork as an image (JPG/PNG)
+  - Share the framed version (via image URL or clipboard copy)
+
+- Include UI buttons for each action
+
+- Add proper accessibility labels and keyboard navigation

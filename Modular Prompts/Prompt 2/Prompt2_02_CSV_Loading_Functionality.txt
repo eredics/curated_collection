@@ -1,0 +1,13 @@
+## MODULE 02: CSV LOADING FUNCTIONALITY (INSTRUCTION-BASED)
+
+- Use Papa Parse to:
+  - Load the artwork CSV file
+  - Parse it into usable JavaScript objects
+  - Automatically skip empty lines
+  - Use headers from the first row
+
+- If there are parsing errors:
+  - Log a detailed error to the console
+  - Gracefully reject the Promise or stop rendering
+
+- Store successful results in dataModel.js for downstream use

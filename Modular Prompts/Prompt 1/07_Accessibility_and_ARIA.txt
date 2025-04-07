@@ -1,0 +1,11 @@
+## MODULE 07: ACCESSIBILITY AND ARIA (INSTRUCTION-BASED)
+
+- Add ARIA roles to make the site accessible:
+  - role="main" for content
+  - role="banner" for header
+  - role="img" with alt text and aria-labels for artwork
+
+- Enable keyboard navigation:
+  - Tab to move through elements
+  - Enter to toggle captions
+  - Escape to close all captions

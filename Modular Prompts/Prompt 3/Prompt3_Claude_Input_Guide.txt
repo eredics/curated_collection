@@ -1,0 +1,28 @@
+# Claude + GitHub Copilot Chat Recipe
+## Prompt 3: Advanced Search & Filtering
+
+---
+
+### STEP-BY-STEP USAGE
+
+1. Open relevant files (e.g. index.html, js/main.js, styles.css).
+2. Paste a Prompt 3 module into Claude Chat.
+3. Ask Claude:
+   - "What files should be modified?"
+   - "Generate HTML, CSS, and JS for this functionality."
+   - "Add comments and consider edge cases."
+
+---
+
+### MODULE OVERVIEW
+
+- 01: Expanded filtering options (AI metadata fields)
+- 02: Live search bar across text fields
+- 03: Active filter display and clear/reset system
+
+---
+
+### Claude Tips:
+- Ask Claude to combine filters using AND logic.
+- Ensure search integrates with all filters.
+- Ask Claude to highlight matched search terms if possible.

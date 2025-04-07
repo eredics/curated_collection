@@ -1,0 +1,66 @@
+# Claude + GitHub Copilot Chat Recipe Guide
+## 📊 Prompt 2: Data Loading & Basic Filtering
+
+Use this recipe to walk through each module and build data filtering features with Claude Sonnet.
+
+---
+
+## BEFORE YOU START
+
+1. Ensure you have a GitHub repo ready and cloned.
+2. Claude should be active inside GitHub Copilot Chat (e.g. in VS Code).
+3. Files like `dataController.js` and `dataModel.js` should be created empty in your /js/ folder.
+
+---
+
+## FOR EACH MODULE, FOLLOW THESE STEPS
+
+### STEP 1: Open Relevant File(s)
+Open the file Claude will need to modify. Example: `js/dataController.js` for data loading.
+
+---
+
+### STEP 2: Paste the Module Prompt into Claude
+Open the relevant .txt file (e.g. `Prompt2_01_Data_Processing_Modules.txt`)  
+Paste it into Claude Chat.
+
+---
+
+### STEP 3: Ask Claude These Questions
+
+1. "Which files need to be modified?"
+2. "Generate all code to complete this module: HTML, JS, CSS."
+3. "Explain any parts that might break or need testing."
+4. "What assumptions are you making in this implementation?"
+
+---
+
+### STEP 4: Review & Adjust
+Accept Claude's code or refine further:
+> “Add debouncing to the filter update”  
+> “Use a dropdown instead of checkboxes”
+
+---
+
+### STEP 5: Save + Sync with GitHub
+
+```bash
+git add .
+git commit -m "Implement Prompt 2 Module 03: Filter Panel Design"
+git push
+```
+
+---
+
+## ✅ MODULE CHECKLIST
+
+- [ ] 01 - Data modules (dataModel & dataController)
+- [ ] 02 - CSV parsing with error handling
+- [ ] 03 - Filter panel structure
+- [ ] 04 - Filter UI controls
+- [ ] 05 - Filter integration logic with reactivity
+
+---
+
+Work step-by-step and commit after each successful module.
+You’re not just filtering data—you’re building an interactive, client-side art experience.

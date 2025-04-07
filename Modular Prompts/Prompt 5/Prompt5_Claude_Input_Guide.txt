@@ -1,0 +1,26 @@
+# Claude + GitHub Copilot Chat Recipe
+## Prompt 5: Advanced Features
+
+---
+
+### STEP-BY-STEP USAGE
+
+1. Open js/main.js, styles.css, and create modal component.
+2. Paste a Prompt 5 module into Claude Chat.
+3. Ask Claude:
+   - "Generate a modal system to visualize artwork frames."
+   - "Make sure frame styles are selectable and visual overlays are realistic."
+   - "Add buttons to download or share the framed image."
+
+---
+
+### MODULE OVERVIEW
+
+- 01: Frame visualization modal
+- 02: Share and download functionality inside modal
+
+---
+
+### Claude Tips:
+- Make sure the modal is keyboard accessible.
+- Ask Claude to handle image generation for sharing/downloading with fallback support.

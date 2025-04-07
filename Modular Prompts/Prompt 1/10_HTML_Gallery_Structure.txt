@@ -1,0 +1,10 @@
+## MODULE 10: HTML GALLERY STRUCTURE (INSTRUCTION-BASED)
+
+- Use a clean and consistent HTML structure for each artwork item
+
+Each artwork should include:
+- An image container with the artwork image wrapped in a link
+- A hidden caption section containing Title, Artist, Price, and Size
+- A toggle button to show/hide the caption
+
+- Use consistent class names for easy styling and scripting

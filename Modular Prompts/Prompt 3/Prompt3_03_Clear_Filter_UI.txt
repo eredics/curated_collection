@@ -1,0 +1,9 @@
+## MODULE 03: CLEAR FILTER UI (INSTRUCTION-BASED)
+
+- Create a section that lists all active filters (text labels)
+
+Features:
+- Each active filter should be individually removable (via [x] button)
+- Add a “Clear All Filters” button to reset search and filters together
+
+- Show this only when filters or search are active

@@ -1,0 +1,12 @@
+## MODULE 04: GALLERY LAYOUT AND CAPTIONS (INSTRUCTION-BASED)
+
+- Build a responsive grid for displaying artwork
+
+Layout should support:
+- 1 column on mobile
+- 2 on tablets
+- 3–4 on desktops
+
+- Each artwork includes:
+  - Clickable image that links to external artwork page
+  - Toggleable caption (Title, Artist, Price, Size)

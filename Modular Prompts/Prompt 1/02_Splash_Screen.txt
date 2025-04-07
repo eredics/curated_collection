@@ -1,0 +1,11 @@
+## MODULE 02: SPLASH SCREEN (INSTRUCTION-BASED)
+
+- Create a splash screen that appears on page load and lasts 1–2 seconds
+
+Splash content should include:
+- Title: Federation Gallery
+- Subtitle with current date
+- "Curated by Claude Haiku 3.5"
+- Visual loading indicator (e.g., progress bar)
+
+- After splash delay, transition to the main gallery grid

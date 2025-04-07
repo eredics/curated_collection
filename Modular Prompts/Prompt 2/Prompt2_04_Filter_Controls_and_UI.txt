@@ -1,0 +1,12 @@
+## MODULE 04: FILTER CONTROLS AND UI (INSTRUCTION-BASED)
+
+- Inside the filter panel, add UI controls to filter the artwork list:
+
+Controls to include:
+- Artist dropdown (one or multiple select)
+- Price input range or min/max fields
+- Membership checkboxes
+- Technique checkboxes or dropdown
+
+- Add a “Clear Filters” button to reset all filters
+- Style controls using CSS for readability and cohesion

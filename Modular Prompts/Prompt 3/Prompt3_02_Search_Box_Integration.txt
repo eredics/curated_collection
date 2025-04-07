@@ -1,0 +1,8 @@
+## MODULE 02: SEARCH BOX INTEGRATION (INSTRUCTION-BASED)
+
+- Add a full-text search bar above the gallery grid
+
+Behavior:
+- Should filter artworks live based on Title, Artist, Technique, or AI Description
+- Must work alongside filter panel (filters + search are combined)
+- Highlight search term matches within visible captions if possible

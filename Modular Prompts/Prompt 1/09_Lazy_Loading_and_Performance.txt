@@ -1,0 +1,7 @@
+## MODULE 09: LAZY LOADING AND PERFORMANCE (INSTRUCTION-BASED)
+
+- Enable lazy loading on all artwork images
+
+- Optimize loading by prioritizing visible images
+
+- Add visual loading indicators where appropriate to signal progress to the user

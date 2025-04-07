@@ -1,0 +1,12 @@
+## MODULE 02: TRANSITIONS AND ANIMATIONS (INSTRUCTION-BASED)
+
+- Add CSS transitions for:
+
+  - Smooth image loading (fade-in)
+  - Filter panel toggle
+  - Caption toggle reveal
+  - Gallery grid transitions (filtering/searching)
+
+- Avoid harsh changes; prefer soft fades, transforms, and subtle movement
+
+- All animations should be non-blocking and performance friendly

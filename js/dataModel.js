@@ -1,0 +1,1 @@
+// Stores structured data for filtering and rendering

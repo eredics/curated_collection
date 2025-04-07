@@ -1,0 +1,13 @@
+## MODULE 05: FILTER LOGIC AND INTEGRATION (INSTRUCTION-BASED)
+
+- Implement JavaScript filtering logic triggered by UI changes
+
+Behavior:
+- When a filter value changes, re-evaluate the dataset
+- Filter the full artwork dataset (from dataModel.js)
+- Display only the artwork cards that match all selected filters
+
+Implementation tips:
+- Use event listeners on filter controls
+- Keep filtering fast (consider debouncing)
+- Keep the original dataset unmodified

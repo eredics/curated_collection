@@ -1,0 +1,15 @@
+## MODULE 08: LOCAL CSP AND SCRIPT LOADING (INSTRUCTION-BASED)
+
+- Apply a strict Content-Security-Policy using a meta tag in index.html
+
+- Only allow:
+  - Local scripts, styles, and images
+  - Fonts from Google Fonts
+  - Inline styles and script fallbacks as needed
+
+- Load the following scripts at the end of the body in this exact order:
+  1. js/libs/papaparse.min.js
+  2. js/constants.js
+  3. js/utils.js
+  4. js/main.js
+  5. js/failsafe.js

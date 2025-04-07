@@ -1,0 +1,13 @@
+## MODULE 01: TYPOGRAPHY AND COLOR PALETTE (INSTRUCTION-BASED)
+
+- Refine the site’s typography:
+
+  - Use a clean sans-serif for UI and elegant serif for headings
+  - Establish hierarchy with size, weight, and spacing
+
+- Use a subtle neutral background and accent colors
+
+  - Ensure good contrast for accessibility
+  - Integrate a muted highlight color (ex: button hovers)
+
+- Apply these styles consistently across captions, filters, and headers

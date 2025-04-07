@@ -1,0 +1,11 @@
+## MODULE 01: FRAME VISUALIZATION MODAL (INSTRUCTION-BASED)
+
+- When an artwork is clicked, open a modal for frame preview
+
+- The modal must:
+  - Display the artwork with several frame style options
+  - Allow switching between frame styles
+  - Use layered visuals to realistically overlay frames
+  - Work with local or preloaded frame assets
+
+- Include basic close button and esc key support

@@ -1,0 +1,76 @@
+# Step-by-Step Claude + GitHub Copilot Chat Recipe
+## 🖼️ Core Gallery Setup — Modular Prompt Workflow with GitHub Integration
+
+This is a step-by-step recipe to build your art gallery using Claude Sonnet inside GitHub Copilot Chat.
+
+---
+
+## 🧰 BEFORE YOU BEGIN
+
+Make sure you have:
+- Claude Sonnet active in GitHub Copilot Chat (inside VS Code)
+- A GitHub repository created and cloned locally
+- These core files in your repo (can be empty to start):
+
+```
+/index.html
+/css/styles.css
+/js/main.js
+/js/constants.js
+/js/utils.js
+/js/failsafe.js
+```
+
+---
+
+## 🧱 STEP-BY-STEP BUILD PROCESS
+
+🔁 REPEAT THE FOLLOWING FOR EACH MODULE:
+
+### STEP 1: Open the Relevant File(s)
+For example:
+- `index.html` for layout or splash
+- `main.js` for logic
+- `styles.css` for visual styling
+
+### STEP 2: Paste a Module into Claude
+Paste the content of a module file into Claude’s chat prompt.
+
+### STEP 3: Ask Claude These Questions
+
+1. "What files should I edit for this module?"
+2. "Please generate the required HTML, CSS, and JS to implement it."
+3. "Add inline comments so I understand what each part does."
+4. "What could go wrong in this implementation?"
+
+### STEP 4: Review + Accept Changes
+Use Claude to refine further:
+> “Add keyboard accessibility”  
+> “Help me debug this one part only”
+
+### STEP 5: Save and Sync with GitHub
+
+```bash
+git add .
+git commit -m "Module 03: Splash screen"
+git push
+```
+
+---
+
+## ✅ PROGRESS CHECKLIST
+
+- [ ] Module 01: File setup
+- [ ] Module 02: Splash screen
+- [ ] Module 03: Data loading and image mapping
+- [ ] Module 04: Gallery layout and responsiveness
+- [ ] Module 05: Caption toggling
+- [ ] Module 06: Image error handling
+- [ ] Module 07: Accessibility improvements
+- [ ] Module 08: CSP and script loading
+- [ ] Module 09: Lazy loading for performance
+- [ ] Module 10: Gallery HTML structure
+
+---
+
+You’re not just feeding prompts. You’re building a real app. Treat each module like a feature and Claude like your dev partner.

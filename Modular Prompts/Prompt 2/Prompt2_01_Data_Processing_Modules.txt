@@ -1,0 +1,15 @@
+## MODULE 01: DATA PROCESSING MODULES (INSTRUCTION-BASED)
+
+- Load artwork data from this CSV:
+  /Users/pete5553/Desktop/curated_collection/data/filtered.csv
+
+- Create two files:
+  - `js/dataController.js` → Responsible for loading and preprocessing data
+  - `js/dataModel.js` → Stores the processed, structured data for use in the app
+
+- Required data fields:
+  Title, Artist, Membership, Technique, Size, Framed_Size, Price, Total_Score
+
+- Use Framed_Size when available, otherwise fallback to Size
+
+- Handle loading errors and provide console/debug logging

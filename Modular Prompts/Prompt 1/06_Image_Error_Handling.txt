@@ -1,0 +1,9 @@
+## MODULE 06: IMAGE ERROR HANDLING (INSTRUCTION-BASED)
+
+- Add logic to detect when an image fails to load
+
+- On error:
+  - Replace the image with a local placeholder
+  - Update alt text and add an 'error-image' class for styling
+
+- Ensure placeholder displays properly even for multiple missing images

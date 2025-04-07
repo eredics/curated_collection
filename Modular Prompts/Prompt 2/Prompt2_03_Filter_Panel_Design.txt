@@ -1,0 +1,10 @@
+## MODULE 03: FILTER PANEL DESIGN (INSTRUCTION-BASED)
+
+- Add a collapsible filter panel above the gallery
+
+Design Notes:
+- The panel should be hidden on initial load
+- Use a “Toggle Filters” button to expand/collapse it
+- Match the look and feel of the gallery with consistent styling
+
+Add to index.html and styles.css as appropriate
