@@ -11,3 +11,4 @@ images_scraped/
 # Node or Python (if added later)
 node_modules/
 __pycache__/
+.DS_Store
