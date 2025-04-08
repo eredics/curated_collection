@@ -192,27 +192,32 @@
 
         // Inside your View object, add a renderArtwork method
         renderArtwork: function(artwork) {
-            const template = `
+            return `
                 <div class="artwork" data-id="${artwork.id}">
-                    <div class="artwork-image-container">
+                    <a href="${artwork.url}" class="artwork-image-container" target="_blank" rel="noopener noreferrer">
                         <img 
-                            src="./images/placeholder.svg" 
+                            src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'></svg>" 
+                            data-src="${artwork.imagePath}" 
                             alt="${artwork.title} by ${artwork.artist}" 
                             class="artwork-image"
-                            data-src="${artwork.imagePath}"
                         />
-                    </div>
+                        <button type="button" class="caption-toggle" aria-label="Toggle artwork details" aria-expanded="false">
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"/>
+                            </svg>
+                        </button>
+                    </a>
                     <div class="artwork-details">
                         <h3 class="artwork-title">${artwork.title}</h3>
                         <p class="artwork-artist">${artwork.artist}</p>
-                        <p class="artwork-technique">${artwork.technique}</p>
-                        <p class="artwork-size">${artwork.displaySize}</p>
-                        <p class="artwork-price">${artwork.price}</p>
+                        <div class="caption-details">
+                            <p class="artwork-technique">${artwork.technique}</p>
+                            <p class="artwork-size">${artwork.displaySize}</p>
+                            <p class="artwork-price">${artwork.price}</p>
+                        </div>
                     </div>
                 </div>
             `;
-            
-            return template;
         },
 
         renderGallery: function(artworks) {
@@ -229,16 +234,31 @@
                 </div>
             `;
             
-            // Load actual images after rendering
+            // Initialize image loading
             document.querySelectorAll('.artwork-image').forEach(img => {
-                // Only try to load if data-src is defined
                 if (img.dataset.src) {
                     ImageHandler.loadImage(img.dataset.src, img);
-                } else {
-                    // Set placeholder directly if no src defined
-                    img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300"><rect width="300" height="300" fill="%23f0f0f0"/><text x="50%" y="50%" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="middle" fill="%23999">Image Not Available</text></svg>';
-                    img.classList.add('placeholder');
                 }
+            });
+            
+            // Add toggle caption functionality
+            this.initCaptionToggles();
+        },
+
+        // Add this new method for caption toggling
+        initCaptionToggles: function() {
+            document.querySelectorAll('.caption-toggle').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault(); // Prevent link navigation when clicking the button
+                    e.stopPropagation(); // Prevent event bubbling to parent link
+                    
+                    const artwork = this.closest('.artwork');
+                    artwork.classList.toggle('caption-expanded');
+                    
+                    // Update aria-expanded attribute for accessibility
+                    const isExpanded = artwork.classList.contains('caption-expanded');
+                    this.setAttribute('aria-expanded', isExpanded);
+                });
             });
         }
     };
@@ -247,28 +267,37 @@
     const Controller = {
         // Initialize the controller
         init: function() {
-            // Initialize splash screen first
-            initSplashScreen();
-            
-            // Then initialize the rest of your app
+            // Initialize Model and View
             Model.init();
             View.init();
+            
+            // Setup routes
             this.setupRoutes();
+            
+            // Load data and render gallery
+            Model.loadData()
+                .then(artworks => {
+                    // Display the gallery once data is loaded
+                    View.renderGallery(Model.state.artworks);
+                })
+                .catch(error => {
+                    console.error('Failed to load artwork data:', error);
+                    document.getElementById('app-content').innerHTML = 
+                        '<div class="error-message">Failed to load gallery data. Please try again later.</div>';
+                });
             
             return this;
         },
         
         // Set up routes
         setupRoutes: function() {
-            // Register routes
             Router.registerRoute('#home', () => {
-                // Home page handler
-                document.getElementById('app-content').innerHTML = '<h1>Curated Collection</h1>';
+                View.renderGallery(Model.state.artworks);
             });
             
-            // Add a proper notfound route
             Router.registerRoute('#notfound', () => {
-                document.getElementById('app-content').innerHTML = '<h1>Page Not Found</h1><p>The page you requested could not be found.</p>';
+                document.getElementById('app-content').innerHTML = 
+                    '<div class="not-found">Page not found. <a href="#home">Return to gallery</a></div>';
             });
             
             // Set default route
