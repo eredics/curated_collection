@@ -38,43 +38,30 @@ const Router = (function() {
      * @param {Object} params - Optional parameters
      */
         navigate: function(path, params = {}) {
-            // Update URL if it's not already the current one
-            if (window.location.hash !== path) {
-                window.history.pushState(params, '', path);
-            }
-      
-            // Find matching route
-            const route = routes.find(route => {
-                // Support for parameterized routes like #gallery/:id
-                const routeParts = route.path.split('/');
-                const pathParts = path.split('/');
-        
-                if (routeParts.length !== pathParts.length) return false;
-        
-                const routeParams = {};
-        
-                for (let i = 0; i < routeParts.length; i++) {
-                    if (routeParts[i].startsWith(':')) {
-                        // This is a parameter
-                        const paramName = routeParts[i].slice(1);
-                        routeParams[paramName] = pathParts[i];
-                    } else if (routeParts[i] !== pathParts[i]) {
-                        return false;
-                    }
-                }
-        
-                // Store parameters for the handler
-                params.routeParams = routeParams;
-                return true;
-            });
-      
+            // Find the route configuration for the given path
+            const route = routes.find(r => r.path === path);
+            
             if (route) {
-                currentRoute = { path, params };
+                // Execute the route handler if found
                 route.handler(params);
+                
+                // Update the active route
+                currentRoute = { path, params };
+                return true;
             } else {
-                console.warn('No route found for path:', path);
-                // Handle 404 case
-                this.navigate('#notfound');
+                console.log('No route found for path:', path);
+                
+                // IMPORTANT: Only redirect to notfound if we're not already trying to go there
+                if (path !== '#notfound' && routes.find(r => r.path === '#notfound')) {
+                    return this.navigate('#notfound');
+                } else if (path !== '#home' && routes.find(r => r.path === '#home')) {
+                    // If no #notfound route exists, try to go home instead
+                    return this.navigate('#home');
+                } else {
+                    // Last resort - show a simple message in the app container
+                    document.getElementById('app-content').innerHTML = '<div class="error">Page not found</div>';
+                    return false;
+                }
             }
         },
     
@@ -87,6 +74,24 @@ const Router = (function() {
         },
     
         /**
+     * Register a route (alias for addRoute)
+     * @param {string} path - Route path (with #)
+     * @param {Function} handler - Route handler function
+     */
+        registerRoute: function(path, handler) {
+            return this.addRoute(path, handler);
+        },
+    
+        /**
+     * Set the default route
+     * @param {string} path - Default route path
+     */
+        setDefaultRoute: function(defaultPath) {
+            this.defaultRoute = defaultPath;
+            return this;
+        },
+    
+        /**
      * Get the current route information
      * @return {Object} - Current route info
      */
@@ -95,3 +100,5 @@ const Router = (function() {
         }
     };
 })();
+
+window.Router = Router;

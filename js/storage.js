@@ -154,3 +154,9 @@ const StorageManager = (function() {
         }
     };
 })();
+
+// For backward compatibility
+const Storage = StorageManager;
+
+// Add this line to explicitly export it as a global
+window.Storage = StorageManager;

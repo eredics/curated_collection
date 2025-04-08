@@ -37,8 +37,9 @@
         loadData: function() {
             this.state.isLoading = true;
             
-            // Use promise-based storage
-            Storage.load(CONSTANTS.STORAGE_KEY)
+            // Use the correct reference consistently - use StorageManager throughout
+            // Change any remaining Storage.load references to StorageManager.load
+            return StorageManager.load('artworks')
                 .then(data => {
                     if (data) {
                         // Update state with loaded data, preserving observable
@@ -58,7 +59,7 @@
         
         // Method to save data using enhanced storage
         saveData: function() {
-            return Storage.save(CONSTANTS.STORAGE_KEY, this.state)
+            return StorageManager.save(CONSTANTS.STORAGE_KEY, this.state)
                 .catch(error => {
                     Failsafe.handleError(error, 'Error saving data');
                 });
@@ -211,49 +212,22 @@
         
         // Set up routes
         setupRoutes: function() {
-            Router.init({
-                defaultRoute: 'home'
+            // Register routes
+            Router.registerRoute('#home', () => {
+                // Home page handler
+                document.getElementById('app-content').innerHTML = '<h1>Welcome to Curated Collection</h1>';
             });
             
-            // Home route
-            Router.addRoute('home', {
-                onEnter: () => {
-                    // Logic for home page
-                    this.model.state.selectedItem = null;
-                },
-                onExit: () => {
-                    // Cleanup for home page
-                }
+            // Add a proper notfound route
+            Router.registerRoute('#notfound', () => {
+                document.getElementById('app-content').innerHTML = '<h1>Page Not Found</h1><p>The page you requested could not be found.</p>';
             });
             
-            // Detail route with parameters
-            Router.addRoute('item', {
-                onEnter: () => {
-                    // Extract item ID from URL
-                    const params = Utils.getUrlParams();
-                    const itemId = parseInt(params.id, 10);
-                    
-                    if (!isNaN(itemId) && itemId >= 0 && itemId < this.model.state.items.length) {
-                        this.model.state.selectedItem = itemId;
-                    } else {
-                        Router.navigateTo('home');
-                    }
-                },
-                onExit: () => {
-                    // Cleanup when leaving detail page
-                }
-            });
+            // Set default route
+            Router.setDefaultRoute('#home');
             
-            // Settings route
-            Router.addRoute('settings', {
-                onEnter: () => {
-                    // Logic for settings page
-                },
-                onExit: () => {
-                    // Save settings when leaving page
-                    this.model.saveData();
-                }
-            });
+            // Initialize router
+            Router.init();
         },
         
         // Set up data bindings between model and view
