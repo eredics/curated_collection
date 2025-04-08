@@ -16,6 +16,8 @@
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+    <!-- Add this right after opening body tag -->
+    <a href="#app-content" class="skip-link">Skip to main content</a>
     <div id="splash-screen" class="splash-screen">
         <div class="splash-content">
             <h1 class="splash-title">Federation Gallery</h1>
@@ -29,9 +31,9 @@
     <!-- Main application container -->
     <div id="app">
         <!-- View components will be rendered here -->
-        <header id="app-header"></header>
-        <main id="app-content"></main>
-        <footer id="app-footer"></footer>
+        <header id="app-header" role="banner"></header>
+        <main id="app-content" role="main"></main>
+        <footer id="app-footer" role="contentinfo"></footer>
     </div>
 
     <!-- Add this before your application scripts -->

@@ -193,26 +193,33 @@
         // Inside your View object, add a renderArtwork method
         renderArtwork: function(artwork) {
             return `
-                <div class="artwork" data-id="${artwork.id}">
-                    <a href="${artwork.url}" class="artwork-image-container" target="_blank" rel="noopener noreferrer">
+                <div class="artwork" data-id="${artwork.id}" tabindex="0" 
+                     role="article" aria-label="Artwork: ${artwork.title} by ${artwork.artist}">
+                    <a href="${artwork.url}" class="artwork-image-container" 
+                       target="_blank" rel="noopener noreferrer"
+                       aria-label="View full details of ${artwork.title} by ${artwork.artist}">
                         <img 
                             src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'></svg>" 
                             data-src="${artwork.imagePath}" 
                             alt="${artwork.title} by ${artwork.artist}" 
                             class="artwork-image"
                             loading="lazy"
+                            role="img"
                         />
-                        <span class="error-indicator" style="display: none;">!</span>
-                        <button type="button" class="caption-toggle" aria-label="Toggle artwork details" aria-expanded="false">
-                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <span class="error-indicator" style="display: none;" aria-hidden="true">!</span>
+                        <button type="button" class="caption-toggle" 
+                                aria-label="Toggle details for ${artwork.title}" 
+                                aria-expanded="false"
+                                aria-controls="caption-${artwork.id}">
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
                                 <path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"/>
                             </svg>
                         </button>
                     </a>
                     <div class="artwork-details">
-                        <h3 class="artwork-title">${artwork.title}</h3>
+                        <h3 class="artwork-title" id="title-${artwork.id}">${artwork.title}</h3>
                         <p class="artwork-artist">${artwork.artist}</p>
-                        <div class="caption-details">
+                        <div class="caption-details" id="caption-${artwork.id}" aria-labelledby="title-${artwork.id}">
                             <p class="artwork-technique">${artwork.technique}</p>
                             <p class="artwork-size">${artwork.displaySize}</p>
                             <p class="artwork-price">${artwork.price}</p>
@@ -226,12 +233,13 @@
             const galleryEl = document.getElementById('app-content');
             
             if (!artworks || artworks.length === 0) {
-                galleryEl.innerHTML = '<div class="no-results">No artworks available</div>';
+                galleryEl.innerHTML = '<div class="no-results" role="status" aria-live="polite">No artworks available</div>';
                 return;
             }
             
             galleryEl.innerHTML = `
-                <div class="gallery-grid">
+                <h2 class="visually-hidden">Gallery of Artworks</h2>
+                <div class="gallery-grid" role="region" aria-label="Artwork gallery">
                     ${artworks.map(artwork => this.renderArtwork(artwork)).join('')}
                 </div>
             `;

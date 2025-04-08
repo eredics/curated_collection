@@ -432,3 +432,68 @@ input:focus, textarea:focus, select:focus {
   font-size: 14px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
+
+/* Accessibility Styles */
+
+/* Screen reader only class */
+.sr-only,
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Focus styles */
+:focus {
+    outline: 2px solid #3498db;
+    outline-offset: 2px;
+}
+
+:focus:not(:focus-visible) {
+    outline: none;
+}
+
+:focus-visible {
+    outline: 2px solid #3498db;
+    outline-offset: 2px;
+}
+
+/* Skip links for keyboard users */
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    padding: 8px;
+    background-color: #fff;
+    z-index: 9999;
+    transition: top 0.3s;
+}
+
+.skip-link:focus {
+    top: 0;
+}
+
+/* Better focus visibility for interactive elements */
+.artwork:focus,
+.caption-toggle:focus {
+    outline: 2px solid #3498db;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.3);
+}
+
+/* High contrast mode support */
+@media (forced-colors: active) {
+    .artwork {
+        border: 1px solid CanvasText;
+    }
+    
+    .caption-toggle {
+        border: 1px solid ButtonText;
+    }
+}
