@@ -67,7 +67,7 @@ git push
 - [X] Module 05: Caption toggling
 - [X] Module 06: Image error handling
 - [X] Module 07: Accessibility improvements
-- [ ] Module 08: CSP and script loading
+- [X] Module 08: CSP and script loading
 - [ ] Module 09: Lazy loading for performance
 - [ ] Module 10: Gallery HTML structure
 

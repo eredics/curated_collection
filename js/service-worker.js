@@ -59,3 +59,35 @@ self.addEventListener('fetch', event => {
         })
     );
 });
+
+// Add this to ensure proper CSP headers in the service worker
+
+self.addEventListener('fetch', event => {
+    event.respondWith(
+        caches.match(event.request).then(response => {
+            // Return cached response if available
+            if (response) {
+                return response;
+            }
+            
+            // Clone the request
+            const fetchRequest = event.request.clone();
+            
+            return fetch(fetchRequest).then(response => {
+                // Check if we received a valid response
+                if (!response || response.status !== 200 || response.type !== 'basic') {
+                    return response;
+                }
+                
+                // Clone the response
+                const responseToCache = response.clone();
+                
+                caches.open('v1').then(cache => {
+                    cache.put(event.request, responseToCache);
+                });
+                
+                return response;
+            });
+        })
+    );
+});

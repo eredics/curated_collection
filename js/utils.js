@@ -286,6 +286,19 @@ const Utils = (function() {
                 if (window._memoryStorage) delete window._memoryStorage[key];
                 return success;
             }
+        },
+
+        /**
+         * Generate a random nonce for CSP
+         * @return {string} A random nonce value
+         */
+        generateNonce: function() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let nonce = '';
+            for (let i = 0; i < 16; i++) {
+                nonce += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return nonce;
         }
     };
 })();

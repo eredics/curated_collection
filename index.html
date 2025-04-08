@@ -2,12 +2,24 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <!-- Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self' 'unsafe-inline';
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+        font-src 'self' https://fonts.gstatic.com;
+        img-src 'self' data:;
+        connect-src 'self';
+        form-action 'self';
+        base-uri 'self';
+        object-src 'none'
+    ">
     <!-- Ensure proper rendering and touch zooming on mobile devices -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <!-- For iOS web applications -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <!-- In the head section, add this tag -->
+    <!-- For mobile web app capability -->
     <meta name="mobile-web-app-capable" content="yes">
     <title>Curated Collection</title>
     <!-- Add manifest for PWA -->
@@ -16,8 +28,10 @@
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <!-- Add this right after opening body tag -->
+    <!-- Skip link for accessibility -->
     <a href="#app-content" class="skip-link">Skip to main content</a>
+    
+    <!-- Splash screen -->
     <div id="splash-screen" class="splash-screen">
         <div class="splash-content">
             <h1 class="splash-title">Federation Gallery</h1>
@@ -28,6 +42,7 @@
             </div>
         </div>
     </div>
+    
     <!-- Main application container -->
     <div id="app">
         <!-- View components will be rendered here -->
@@ -35,13 +50,12 @@
         <main id="app-content" role="main"></main>
         <footer id="app-footer" role="contentinfo"></footer>
     </div>
-
-    <!-- Add this before your application scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-    <script src="js/data-loader.js"></script>
-    <script src="js/image-handler.js"></script>
-
-    <!-- Load application scripts in the right order -->
+    
+    <!-- Screen reader announcer -->
+    <div id="sr-announcer" class="sr-only" aria-live="polite"></div>
+    
+    <!-- Scripts loaded in specific order at the end of body -->
+    <script src="js/libs/papaparse.min.js"></script>
     <script src="js/constants.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/failsafe.js"></script>
@@ -49,34 +63,35 @@
     <script src="js/component.js"></script>
     <script src="js/data-binding.js"></script>
     <script src="js/storage.js"></script>
-    <script src="js/router.js"></script> <!-- ADD THIS LINE -->
-    <script>
-        // Debug and fix Storage
-        console.log('StorageManager exists:', typeof StorageManager);
-        console.log('StorageManager.load exists:', typeof StorageManager.load);
-        console.log('Router exists:', typeof Router); // Add this to verify
-        
-        // Create Storage.load if it doesn't exist
-        if (typeof Storage === 'undefined' || typeof Storage.load !== 'function') {
-            console.log('Fixing Storage.load reference');
-            window.Storage = StorageManager || {};
-        }
-    </script>
+    <script src="js/router.js"></script>
+    <script src="js/data-loader.js"></script>
+    <script src="js/image-handler.js"></script>
     <script src="js/main.js"></script>
     
-    <!-- Register service worker -->
+    <!-- Initialize application -->
     <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/js/service-worker.js')
-                    .then(registration => {
-                        console.log('ServiceWorker registered: ', registration.scope);
-                    })
-                    .catch(error => {
-                        console.log('ServiceWorker registration failed: ', error);
-                    });
-            });
-        }
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize splash screen
+            const dateElement = document.getElementById('splash-date');
+            const options = { 
+                weekday: 'long',
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            dateElement.textContent = new Date().toLocaleDateString(undefined, options);
+            
+            // Hide splash screen after animation completes
+            setTimeout(() => {
+                const splashScreen = document.getElementById('splash-screen');
+                splashScreen.classList.add('hidden');
+                
+                // Remove splash screen from DOM after transition
+                setTimeout(() => {
+                    splashScreen.remove();
+                }, 500);
+            }, 1800);
+        });
     </script>
 </body>
 </html>
