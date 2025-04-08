@@ -581,3 +581,173 @@ input:focus, textarea:focus, select:focus {
         border: 1px solid ButtonText;
     }
 }
+
+/* Gallery container */
+.gallery-container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.gallery-title {
+  font-size: 2rem;
+  text-align: center;
+  margin: 1rem 0 0.5rem;
+  color: #333;
+}
+
+.gallery-subtitle {
+  font-size: 1.1rem;
+  text-align: center;
+  margin: 0 0 2rem;
+  color: #666;
+  font-style: italic;
+}
+
+/* Artwork item */
+.artwork {
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.artwork:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Image wrapper and container */
+.artwork-image-wrapper {
+  position: relative;
+}
+
+.artwork-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.artwork-image-container {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
+  background-color: #f5f5f5;
+}
+
+.artwork-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.artwork-link:hover .artwork-image {
+  transform: scale(1.05);
+}
+
+/* Loading indicator */
+.loading-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.artwork-image.loaded-image + .loading-indicator {
+  display: none;
+}
+
+/* Caption toggle button */
+.caption-toggle {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  z-index: 2;
+  transition: background-color 0.2s ease;
+}
+
+.caption-toggle:hover, .caption-toggle:focus {
+  background-color: white;
+  outline: 2px solid #3498db;
+}
+
+.caption-toggle svg {
+  width: 20px;
+  height: 20px;
+  fill: #333;
+  transition: transform 0.3s ease;
+}
+
+.caption-expanded .caption-toggle svg {
+  transform: rotate(180deg);
+}
+
+/* Artwork details */
+.artwork-details {
+  padding: 1rem;
+  background-color: white;
+}
+
+.artwork-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: #333;
+}
+
+.artwork-artist {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+/* Caption details (toggleable) */
+.caption-details {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.3s ease, margin 0.3s ease;
+  opacity: 0;
+  margin-top: 0;
+}
+
+.caption-expanded .caption-details {
+  max-height: 150px;
+  opacity: 1;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #eee;
+}
+
+.artwork-technique, .artwork-size, .artwork-price {
+  margin: 0 0 0.5rem;
+  font-size: 0.9rem;
+  color: #666;
+  line-height: 1.4;
+}
+
+.caption-label {
+  font-weight: 600;
+  color: #555;
+}

@@ -190,77 +190,94 @@
             this.components.footer.render(this.elements.footer, state);
         },
 
-        // Inside your View object, add a renderArtwork method
+        // Update the renderArtwork method in View object for a cleaner structure
+
         renderArtwork: function(artwork) {
             return `
-                <div class="artwork" data-id="${artwork.id}" tabindex="0" 
-                     role="article" aria-label="Artwork: ${artwork.title} by ${artwork.artist}">
-                    <a href="${artwork.url}" class="artwork-image-container" 
-                       target="_blank" rel="noopener noreferrer"
-                       aria-label="View full details of ${artwork.title} by ${artwork.artist}">
-                        <img 
-                            src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'></svg>" 
-                            data-src="${artwork.imagePath}" 
-                            alt="${artwork.title} by ${artwork.artist}" 
-                            class="artwork-image"
-                            loading="lazy"
-                            role="img"
-                        />
-                        <span class="error-indicator" style="display: none;" aria-hidden="true">!</span>
+                <article class="artwork" data-id="${artwork.id}" tabindex="0" 
+                        aria-label="Artwork: ${artwork.title} by ${artwork.artist}">
+                    <!-- Artwork image container -->
+                    <div class="artwork-image-wrapper">
+                        <a href="${artwork.url}" class="artwork-link" 
+                           target="_blank" rel="noopener noreferrer"
+                           aria-label="View full details of ${artwork.title} by ${artwork.artist}">
+                            <div class="artwork-image-container">
+                                <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'></svg>" 
+                                    data-src="${artwork.imagePath}" 
+                                    alt="${artwork.title} by ${artwork.artist}" 
+                                    class="artwork-image"
+                                    loading="lazy"
+                                />
+                                <div class="loading-indicator">
+                                    <div class="loading-shimmer"></div>
+                                </div>
+                            </div>
+                        </a>
+                        
+                        <!-- Caption toggle button -->
                         <button type="button" class="caption-toggle" 
                                 aria-label="Toggle details for ${artwork.title}" 
                                 aria-expanded="false"
                                 aria-controls="caption-${artwork.id}">
-                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                                 <path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"/>
                             </svg>
                         </button>
-                    </a>
+                    </div>
+                    
+                    <!-- Artwork details/caption -->
                     <div class="artwork-details">
+                        <!-- Always visible information -->
                         <h3 class="artwork-title" id="title-${artwork.id}">${artwork.title}</h3>
                         <p class="artwork-artist">${artwork.artist}</p>
+                        
+                        <!-- Hidden caption content (toggleable) -->
                         <div class="caption-details" id="caption-${artwork.id}" aria-labelledby="title-${artwork.id}">
-                            <p class="artwork-technique">${artwork.technique}</p>
-                            <p class="artwork-size">${artwork.displaySize}</p>
-                            <p class="artwork-price">${artwork.price}</p>
+                            ${artwork.technique ? `<p class="artwork-technique"><span class="caption-label">Technique:</span> ${artwork.technique}</p>` : ''}
+                            ${artwork.displaySize ? `<p class="artwork-size">${artwork.displaySize}</p>` : ''}
+                            ${artwork.price ? `<p class="artwork-price"><span class="caption-label">Price:</span> ${artwork.price}</p>` : ''}
                         </div>
                     </div>
-                </div>
+                </article>
             `;
         },
 
+        // Update the gallery container structure
         renderGallery: function(artworks) {
             const galleryEl = document.getElementById('app-content');
             
-            if (!artworks || artworks.length === 0) {
-                galleryEl.innerHTML = '<div class="no-results" role="status" aria-live="polite">No artworks available</div>';
-                return;
-            }
-            
+            // Show loading state initially
             galleryEl.innerHTML = `
-                <h2 class="visually-hidden">Gallery of Artworks</h2>
-                <div class="gallery-grid" role="region" aria-label="Artwork gallery">
-                    ${artworks.map(artwork => this.renderArtwork(artwork)).join('')}
+                <div class="gallery-loading" aria-label="Loading gallery">
+                    <div class="gallery-loading-spinner" role="status" aria-hidden="true"></div>
+                    <span class="sr-only">Loading artworks...</span>
                 </div>
             `;
             
-            // Initialize image loading with error handling
-            document.querySelectorAll('.artwork-image').forEach(img => {
-                if (img.dataset.src) {
-                    ImageHandler.loadImage(img.dataset.src, img);
-                    
-                    // Add error indicator logic for browsers that don't support :has
-                    img.addEventListener('imageLoadError', function() {
-                        const errorIndicator = this.closest('.artwork-image-container').querySelector('.error-indicator');
-                        if (errorIndicator) {
-                            errorIndicator.style.display = 'flex';
-                        }
-                    });
+            setTimeout(() => {
+                if (!artworks || artworks.length === 0) {
+                    galleryEl.innerHTML = '<div class="no-results" role="status" aria-live="polite">No artworks available</div>';
+                    return;
                 }
-            });
-            
-            // Add toggle caption functionality
-            this.initCaptionToggles();
+                
+                galleryEl.innerHTML = `
+                    <section class="gallery-container">
+                        <h2 class="gallery-title">Federation Gallery</h2>
+                        <p class="gallery-subtitle">A curated collection of fine artworks</p>
+                        
+                        <div class="gallery-grid" role="region" aria-label="Artwork gallery">
+                            ${artworks.map(artwork => this.renderArtwork(artwork)).join('')}
+                        </div>
+                    </section>
+                `;
+                
+                // Setup lazy loading for all images
+                ImageHandler.setupLazyLoading();
+                
+                // Initialize other interactive elements
+                this.initCaptionToggles();
+                this.setupKeyboardNavigation();
+            }, 400);
         },
 
         // Add this new method for caption toggling

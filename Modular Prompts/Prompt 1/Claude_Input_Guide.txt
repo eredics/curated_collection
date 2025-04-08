@@ -69,7 +69,7 @@ git push
 - [X] Module 07: Accessibility improvements
 - [X] Module 08: CSP and script loading
 - [X] Module 09: Lazy loading for performance
-- [ ] Module 10: Gallery HTML structure
+- [X] Module 10: Gallery HTML structure
 
 ---
 
