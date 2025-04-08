@@ -292,11 +292,21 @@
             // Setup routes
             this.setupRoutes();
             
+            // Setup scroll handling for lazy loading
+            this.setupScrollHandling();
+            
             // Load data and render gallery
             Model.loadData()
                 .then(artworks => {
                     // Display the gallery once data is loaded
                     View.renderGallery(Model.state.artworks);
+                    
+                    // After a short delay, prefetch images for items currently in viewport
+                    setTimeout(() => {
+                        const handleScroll = document.createEvent('Event');
+                        handleScroll.initEvent('scroll', true, true);
+                        window.dispatchEvent(handleScroll);
+                    }, 500);
                 })
                 .catch(error => {
                     console.error('Failed to load artwork data:', error);
@@ -423,6 +433,33 @@
                 Utils.addClass(document.body, 'offline');
                 Failsafe.showOfflineNotification();
             }
+        },
+
+        // Add this to your Controller object's init method
+        setupScrollHandling: function() {
+            // Prioritize images in viewport when scrolling
+            const handleScroll = Utils.throttle(function() {
+                // Check if any unloaded images are now in viewport
+                const unloadedImages = document.querySelectorAll('img[data-src]:not([data-loaded])');
+                
+                unloadedImages.forEach(img => {
+                    if (Utils.isInViewport(img, 300)) {
+                        // Prioritize this image by forcing load
+                        if (img.dataset.src) {
+                            ImageHandler.loadImage(img.dataset.src, img);
+                        }
+                    }
+                });
+            }, 200); // Throttle to every 200ms
+            
+            // Add scroll listener
+            window.addEventListener('scroll', handleScroll);
+            
+            // Also check on resize
+            window.addEventListener('resize', Utils.throttle(handleScroll, 500));
+            
+            // Initial check for visible images
+            handleScroll();
         }
     };
 

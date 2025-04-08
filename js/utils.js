@@ -299,6 +299,46 @@ const Utils = (function() {
                 nonce += chars.charAt(Math.floor(Math.random() * chars.length));
             }
             return nonce;
+        },
+
+        /**
+         * Check if an element is in the viewport
+         * @param {HTMLElement} el - Element to check
+         * @param {number} offset - Offset from viewport edges
+         * @return {boolean} - True if element is in viewport
+         */
+        isInViewport: function(el, offset = 0) {
+            if (!el) return false;
+            
+            const rect = el.getBoundingClientRect();
+            
+            return (
+                rect.top >= 0 - offset &&
+                rect.left >= 0 - offset &&
+                rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) + offset &&
+                rect.right <= (window.innerWidth || document.documentElement.clientWidth) + offset
+            );
+        },
+
+        /**
+         * Throttle a function to limit how often it can run
+         * @param {Function} func - Function to throttle
+         * @param {number} limit - Time limit in ms
+         * @return {Function} - Throttled function
+         */
+        throttle: function(func, limit) {
+            let inThrottle;
+            
+            return function() {
+                const args = arguments;
+                const context = this;
+                
+                if (!inThrottle) {
+                    func.apply(context, args);
+                    inThrottle = true;
+                    setTimeout(() => inThrottle = false, limit);
+                }
+            };
         }
     };
 })();
