@@ -13,3 +13,4 @@ node_modules/
 __pycache__/
 .DS_Store
 images_scraped/
+images_scraped/
