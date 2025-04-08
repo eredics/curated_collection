@@ -1,0 +1,4 @@
+"scripts": {
+  "lint": "eslint js/*.js",
+  "lint:fix": "eslint js/*.js --fix"
+}

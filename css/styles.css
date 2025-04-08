@@ -1,1 +1,147 @@
-/* Placeholder for styles */
+/* Base styles and CSS reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+
+    /* Improves touch behavior on iOS */
+    -webkit-touch-callout: none;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+    /* Prevent text size adjustment on orientation change in iOS */
+    text-size-adjust: 100%;
+
+    /* Fix for full height on iOS */
+    position: fixed;
+    overflow: hidden;
+
+    /* Disable overscroll/bounce effect on iOS */
+    overscroll-behavior: none;
+}
+
+/* Main application container */
+#app {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+
+    /* Use iOS safe area for proper layout with notches */
+    padding: env(safe-area-inset-top) env(safe-area-inset-right)
+             env(safe-area-inset-bottom) env(safe-area-inset-left);
+
+    /* Fix for iOS height issues with keyboard */
+    position: absolute;
+    inset: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */ /* Fallback */
+    height: calc(var(--vh, 1vh) * 100); /* Use CSS variable when available */
+}
+
+/* Header, main content, and footer layout */
+#app-header {
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    text-align: center;
+}
+
+#app-content {
+    flex: 1;
+    padding: 1rem;
+    overflow-y: auto;
+
+    /* Main content will expand to fill available space */
+}
+
+#app-footer {
+    padding: 0.75rem;
+    background-color: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+    text-align: center;
+    font-size: 0.875rem;
+}
+
+/* iOS-specific styles - prevent highlight on tap and other improvements */
+button, a, [role="button"], input[type="button"], input[type="submit"] {
+    -webkit-tap-highlight-color: transparent;
+    cursor: pointer;
+
+    /* Prevent text selection */
+    user-select: none;
+
+    /* Better touch feedback */
+    transition: opacity 0.2s;
+    min-height: 44px;
+    min-width: 44px;
+}
+
+button:active, a:active, [role="button"]:active, 
+input[type="button"]:active, input[type="submit"]:active {
+    opacity: 0.7;
+}
+
+/* Fix for iOS overflow scrolling */
+.scrollable {
+    overflow: hidden auto;
+    -webkit-overflow-scrolling: touch;
+
+    /* Prevent horizontal scrolling */
+}
+
+/* Fix for iOS input styles */
+input, textarea, select {
+    /* Disable iOS auto-zoom on focus */
+    font-size: 16px;
+
+    /* Remove iOS default styling */
+    appearance: none;
+    border-radius: 0;
+}
+
+input:focus, textarea:focus, select:focus {
+    /* Prevent iOS default highlight */
+    outline: none;
+
+    /* Custom focus style */
+    box-shadow: 0 0 0 2px rgb(0 123 255 / 50%);
+}
+
+/* Responsive design for different screen sizes */
+@media (width <= 768px) {
+    /* Tablet styles */
+}
+
+@media (width <= 480px) {
+    /* Mobile styles */
+}
+
+/* Offline indicator styling */
+.offline-indicator {
+    display: none;
+    padding: 10px;
+    background-color: #f8d7da;
+    color: #721c24;
+    text-align: center;
+}
+
+/* Show the indicator when offline class is added */
+.offline-indicator.show {
+    display: block;
+}
+
+/* Keyboard adjustments for iOS */
+@media screen and (height <= 450px) {
+    /* Adjustments when keyboard is visible */
+    #app-footer {
+        display: none;
+    }
+    
+    #app-content {
+        padding-bottom: 20px;
+    }
+}

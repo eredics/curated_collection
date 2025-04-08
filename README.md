@@ -90,4 +90,31 @@ Ask follow-ups like:
 
 ---
 
+## Development
+
+### Code Quality
+
+This project uses linting tools to maintain code quality and consistency:
+
+- **JavaScript**: ESLint with custom configuration
+- **CSS**: Stylelint with standard configuration
+- **HTML**: HTMLHint
+
+#### Linting Commands
+
+```bash
+# Lint all files
+npm run lint
+
+# Lint and automatically fix issues where possible
+npm run lint:fix
+
+# Lint specific file types
+npm run lint:js
+npm run lint:css
+npm run lint:html
+```
+
+---
+
 This file will grow as the project evolves.
