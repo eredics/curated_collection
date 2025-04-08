@@ -16,6 +16,16 @@
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+    <div id="splash-screen" class="splash-screen">
+        <div class="splash-content">
+            <h1 class="splash-title">Federation Gallery</h1>
+            <h2 class="splash-date" id="splash-date"></h2>
+            <p class="splash-curator">Curated by Claude Haiku 3.5</p>
+            <div class="splash-loader">
+                <div class="splash-loader-bar"></div>
+            </div>
+        </div>
+    </div>
     <!-- Main application container -->
     <div id="app">
         <!-- View components will be rendered here -->
@@ -23,6 +33,11 @@
         <main id="app-content"></main>
         <footer id="app-footer"></footer>
     </div>
+
+    <!-- Add this before your application scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script src="js/data-loader.js"></script>
+    <script src="js/image-handler.js"></script>
 
     <!-- Load application scripts in the right order -->
     <script src="js/constants.js"></script>

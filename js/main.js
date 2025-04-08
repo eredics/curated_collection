@@ -37,23 +37,26 @@
         loadData: function() {
             this.state.isLoading = true;
             
-            // Use the correct reference consistently - use StorageManager throughout
-            // Change any remaining Storage.load references to StorageManager.load
-            return StorageManager.load('artworks')
-                .then(data => {
-                    if (data) {
-                        // Update state with loaded data, preserving observable
-                        Object.keys(data).forEach(key => {
-                            if (Object.prototype.hasOwnProperty.call(data, key)) {
-                                // Your code here
-                            }
-                        });
-                    }
+            // Use the DataLoader to load artwork data
+            return DataLoader.init()
+                .then(artworks => {
+                    this.state.artworks = artworks;
                     this.state.isLoading = false;
+                    
+                    // Optionally preload images
+                    return ImageHandler.preloadImages(
+                        artworks.map(artwork => artwork.imagePath),
+                        (progress) => {
+                            // Update loading progress in UI if needed
+                            this.state.loadingProgress = progress * 100;
+                        }
+                    );
                 })
                 .catch(error => {
-                    Failsafe.handleError(error, 'Error loading data');
                     this.state.isLoading = false;
+                    this.state.error = 'Failed to load artwork data: ' + error.message;
+                    console.error('Error loading data:', error);
+                    return Promise.reject(error);
                 });
         },
         
@@ -185,27 +188,72 @@
             this.components.header.render(this.elements.header, state);
             this.components.content.render(this.elements.content, state);
             this.components.footer.render(this.elements.footer, state);
+        },
+
+        // Inside your View object, add a renderArtwork method
+        renderArtwork: function(artwork) {
+            const template = `
+                <div class="artwork" data-id="${artwork.id}">
+                    <div class="artwork-image-container">
+                        <img 
+                            src="./images/placeholder.svg" 
+                            alt="${artwork.title} by ${artwork.artist}" 
+                            class="artwork-image"
+                            data-src="${artwork.imagePath}"
+                        />
+                    </div>
+                    <div class="artwork-details">
+                        <h3 class="artwork-title">${artwork.title}</h3>
+                        <p class="artwork-artist">${artwork.artist}</p>
+                        <p class="artwork-technique">${artwork.technique}</p>
+                        <p class="artwork-size">${artwork.displaySize}</p>
+                        <p class="artwork-price">${artwork.price}</p>
+                    </div>
+                </div>
+            `;
+            
+            return template;
+        },
+
+        renderGallery: function(artworks) {
+            const galleryEl = document.getElementById('app-content');
+            
+            if (!artworks || artworks.length === 0) {
+                galleryEl.innerHTML = '<div class="no-results">No artworks available</div>';
+                return;
+            }
+            
+            galleryEl.innerHTML = `
+                <div class="gallery-grid">
+                    ${artworks.map(artwork => this.renderArtwork(artwork)).join('')}
+                </div>
+            `;
+            
+            // Load actual images after rendering
+            document.querySelectorAll('.artwork-image').forEach(img => {
+                // Only try to load if data-src is defined
+                if (img.dataset.src) {
+                    ImageHandler.loadImage(img.dataset.src, img);
+                } else {
+                    // Set placeholder directly if no src defined
+                    img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300"><rect width="300" height="300" fill="%23f0f0f0"/><text x="50%" y="50%" font-family="Arial" font-size="20" text-anchor="middle" dominant-baseline="middle" fill="%23999">Image Not Available</text></svg>';
+                    img.classList.add('placeholder');
+                }
+            });
         }
     };
 
     // Controller - Handles user interactions and updates model/view
     const Controller = {
         // Initialize the controller
-        init: function(model, view) {
-            this.model = model;
-            this.view = view;
+        init: function() {
+            // Initialize splash screen first
+            initSplashScreen();
             
-            // Set up routes
+            // Then initialize the rest of your app
+            Model.init();
+            View.init();
             this.setupRoutes();
-            
-            // Set up data bindings
-            this.setupBindings();
-            
-            // Set up event listeners
-            this.setupEventListeners();
-            
-            // Check connection status initially
-            this.checkConnectionStatus();
             
             return this;
         },
@@ -215,7 +263,7 @@
             // Register routes
             Router.registerRoute('#home', () => {
                 // Home page handler
-                document.getElementById('app-content').innerHTML = '<h1>Welcome to Curated Collection</h1>';
+                document.getElementById('app-content').innerHTML = '<h1>Curated Collection</h1>';
             });
             
             // Add a proper notfound route
@@ -331,8 +379,34 @@
         }
     };
 
-    // Initialize the application when the DOM is ready
+    // Add this function inside your init method
+    function initSplashScreen() {
+        // Set current date in splash screen
+        const dateElement = document.getElementById('splash-date');
+        const options = { 
+            weekday: 'long',
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        };
+        dateElement.textContent = new Date().toLocaleDateString(undefined, options);
+        
+        // Hide splash screen after animation completes
+        setTimeout(() => {
+            const splashScreen = document.getElementById('splash-screen');
+            splashScreen.classList.add('hidden');
+            
+            // Remove splash screen from DOM after transition
+            setTimeout(() => {
+                splashScreen.remove();
+            }, 500);
+        }, 1800); // Match this with the CSS animation duration
+    }
+
+    // Call this function early in your initialization process
+    // For example, in your Controller.init() function or at DOMContentLoaded
     document.addEventListener('DOMContentLoaded', function() {
+        initSplashScreen();
         // Load dependencies before initializing the app
         Promise.all([
             // Any async initialization can be done here

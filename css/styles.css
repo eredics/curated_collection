@@ -145,3 +145,150 @@ input:focus, textarea:focus, select:focus {
         padding-bottom: 20px;
     }
 }
+
+/* Splash Screen Styles */
+.splash-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #f8f9fa;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 1;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.splash-screen.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.splash-content {
+    text-align: center;
+    padding: 2rem;
+}
+
+.splash-title {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+.splash-date {
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+    color: #666;
+}
+
+.splash-curator {
+    font-size: 1rem;
+    margin-bottom: 2rem;
+    color: #888;
+    font-style: italic;
+}
+
+.splash-loader {
+    width: 100%;
+    max-width: 300px;
+    height: 4px;
+    background-color: #e9ecef;
+    border-radius: 2px;
+    overflow: hidden;
+    margin: 0 auto;
+}
+
+.splash-loader-bar {
+    height: 100%;
+    width: 0%;
+    background-color: #3498db;
+    animation: progress 1.8s ease-in-out forwards;
+}
+
+@keyframes progress {
+    0% { width: 0%; }
+    100% { width: 100%; }
+}
+
+@media (width <= 768px) {
+    .splash-title {
+        font-size: 1.8rem;
+    }
+    
+    .splash-date {
+        font-size: 1rem;
+    }
+}
+
+/* Gallery Grid */
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 2rem;
+    padding: 2rem;
+}
+
+.artwork {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background: white;
+}
+
+.artwork:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+}
+
+.artwork-image-container {
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background-color: #f0f0f0;
+}
+
+.artwork-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.3s ease;
+}
+
+.artwork-image.placeholder {
+    opacity: 0.7;
+}
+
+.artwork-details {
+    padding: 1rem;
+}
+
+.artwork-title {
+    margin: 0 0 0.5rem;
+    font-size: 1.2rem;
+}
+
+.artwork-artist {
+    margin: 0 0 0.5rem;
+    color: #666;
+}
+
+.artwork-technique, .artwork-size, .artwork-price {
+    margin: 0 0 0.25rem;
+    font-size: 0.9rem;
+    color: #777;
+}
+
+.artwork-price {
+    font-weight: bold;
+    color: #555;
+}
+
+.no-results {
+    text-align: center;
+    padding: 3rem;
+    color: #666;
+    font-size: 1.2rem;
+}

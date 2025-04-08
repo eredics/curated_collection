@@ -60,9 +60,9 @@ git push
 
 ## ✅ PROGRESS CHECKLIST
 
-- [ ] Module 01: File setup
-- [ ] Module 02: Splash screen
-- [ ] Module 03: Data loading and image mapping
+- [X] Module 01: File setup
+- [X] Module 02: Splash screen
+- [X] Module 03: Data loading and image mapping
 - [ ] Module 04: Gallery layout and responsiveness
 - [ ] Module 05: Caption toggling
 - [ ] Module 06: Image error handling
