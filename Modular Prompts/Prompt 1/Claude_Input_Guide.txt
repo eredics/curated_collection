@@ -64,8 +64,8 @@ git push
 - [X] Module 02: Splash screen
 - [X] Module 03: Data loading and image mapping
 - [X] Module 04: Gallery layout and responsiveness
-- [ ] Module 05: Caption toggling
-- [ ] Module 06: Image error handling
+- [X] Module 05: Caption toggling
+- [X] Module 06: Image error handling
 - [ ] Module 07: Accessibility improvements
 - [ ] Module 08: CSP and script loading
 - [ ] Module 09: Lazy loading for performance

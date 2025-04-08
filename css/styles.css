@@ -375,3 +375,60 @@ input:focus, textarea:focus, select:focus {
     color: #666;
     font-size: 1.2rem;
 }
+
+/* Add these to your existing CSS */
+
+/* Image loading and error states */
+.artwork-image.loading-image {
+  opacity: 0.5;
+  filter: brightness(0.8) grayscale(0.5);
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.7; }
+}
+
+.artwork-image.error-image {
+  background-color: #f8f8f8;
+  opacity: 0.8;
+  border: 1px solid #eee;
+}
+
+/* Add a subtle indication that the image failed */
+.artwork-image-container:has(.error-image)::after {
+  content: "!";
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: #e74c3c;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* For browsers that don't support :has */
+.error-indicator {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: #e74c3c;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}

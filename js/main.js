@@ -200,7 +200,9 @@
                             data-src="${artwork.imagePath}" 
                             alt="${artwork.title} by ${artwork.artist}" 
                             class="artwork-image"
+                            loading="lazy"
                         />
+                        <span class="error-indicator" style="display: none;">!</span>
                         <button type="button" class="caption-toggle" aria-label="Toggle artwork details" aria-expanded="false">
                             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"/>
@@ -234,10 +236,18 @@
                 </div>
             `;
             
-            // Initialize image loading
+            // Initialize image loading with error handling
             document.querySelectorAll('.artwork-image').forEach(img => {
                 if (img.dataset.src) {
                     ImageHandler.loadImage(img.dataset.src, img);
+                    
+                    // Add error indicator logic for browsers that don't support :has
+                    img.addEventListener('imageLoadError', function() {
+                        const errorIndicator = this.closest('.artwork-image-container').querySelector('.error-indicator');
+                        if (errorIndicator) {
+                            errorIndicator.style.display = 'flex';
+                        }
+                    });
                 }
             });
             
