@@ -2,7 +2,32 @@
 
 An AI-curated, modular virtual gallery built with Claude Sonnet (via GitHub Copilot Chat) using a step-by-step prompt system.
 
-Designed to be fully offline, accessible, and responsive, this gallery loads artwork from a local CSV and displays it using a grid-based layout.
+Designed to be fully offline, accessible, and responsive, this gallery loads artwork from a local CSV and displays it using a flexbox-based layout.
+
+## Features
+
+- **Infinite Scrolling Gallery**: Load thousands of images efficiently
+- **Responsive Layout**: Adapts to different screen sizes
+- **Filtering System**: Filter by artist, technique, and price
+- **Lazy Loading**: Images load as they enter viewport
+- **Fast Initial Load**: First batch displays immediately
+
+## Installation
+
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/eredics/curated_collection.git
+   ```
+
+2. Navigate to the project directory:
+cd curated_collection
+
+3. Serve with any static server:
+python -m http.server 8000
+
+4. Open in your browser:
+http://localhost:8000
+
 
 ## 🏗️ Architecture Overview
 
@@ -288,3 +313,35 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 * [GitHub Copilot](https://github.com/features/copilot) - AI pair programming tool
 
 ---
+
+## Technical Implementation
+
+- **Data Source**: CSV file with 10,000+ artwork entries
+- **Image Loading**: Progressive with placeholders
+- **Layout**: Flexbox-based gallery with fixed-size items
+- **Dependencies**: No external frameworks - vanilla JavaScript
+
+## Browser Compatibility
+
+- Chrome (latest)
+- Firefox (latest)
+- Safari (latest)
+- Edge (latest)
+
+## Known Issues
+
+See [Known Issues](#known-issues) section below.
+
+## License
+
+[Your License]
+
+## Assumptions
+Fixed Dimensions: We assumed that fixed artwork dimensions (220px × 240px) provide the most reliable layout
+Flexbox Superiority: We determined flexbox works better than CSS grid for this specific gallery layout
+Direct DOM Manipulation: We assumed direct DOM creation is more efficient than templating for this use case
+Batch Loading: We assumed loading 20-40 items at a time provides the optimal balance between performance and UX
+Style Overriding: We assumed using !important was necessary to overcome conflicting styles
+Single Data Source: We assumed all artwork data comes from one CSV file with a consistent format
+Modern Browser Features: We assumed support for modern JS/CSS features like flexbox and IntersectionObserver
+Image Availability: We assumed all image paths in the CSV data point to valid, accessible image files

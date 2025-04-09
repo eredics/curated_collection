@@ -1,0 +1,41 @@
+/* Styles for virtual scrolling */
+
+/* Main container */
+.gallery-container {
+    height: calc(100vh - 120px); /* Adjust based on your layout */
+    overflow: hidden auto;
+    position: relative;
+    contain: strict; /* CSS containment for better performance */
+}
+
+/* Gallery items container */
+.gallery-items {
+    width: 100%;
+    position: relative;
+}
+
+/* Artwork items when using virtual scrolling */
+.gallery-items .artwork {
+    position: absolute;
+    width: 100%;
+    box-sizing: border-box;
+    transition: none !important; /* Disable transitions when using virtual scrolling */
+}
+
+/* Fast-moving scrollbar styling */
+.gallery-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.gallery-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.gallery-container::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.gallery-container::-webkit-scrollbar-thumb:hover {
+    background: #666;
+}

@@ -74,3 +74,28 @@ git push
 ---
 
 You’re not just feeding prompts. You’re building a real app. Treat each module like a feature and Claude like your dev partner.
+
+---
+
+## 💡 IMPLEMENTATION GUIDELINES
+
+Don't implement abstract or theoretical solutions. Write concrete code with:
+- Direct DOM manipulation for the gallery items
+- Fixed-size containers for consistent layout
+- Minimal HTML structure (container → item → image)
+- Inline styles where needed to guarantee layout
+- Explicit height/width controls to prevent browser-specific rendering issues
+
+Include comprehensive debugging aids such as:
+- Console logs that report real-time gallery state
+- Visual indicators when images are loading/loaded
+- Error reporting for failed image loads
+- Performance metrics for scrolling
+- Component boundary logging to trace execution flow
+
+Follow this CSS architecture to prevent style conflicts:
+- Use BEM naming convention for all classes
+- Namespace all gallery-related classes
+- Maintain a single source of truth for dimensions
+- Order rules from least to most specific
+- Document the purpose of each selector with comments"

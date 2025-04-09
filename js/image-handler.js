@@ -12,7 +12,9 @@ const ImageHandler = (function() {
         loadedClass: 'loaded-image',
         errorAltText: 'Image unavailable',
         retryLimit: 2,
-        retryDelay: 1000 // ms
+        retryDelay: 1000, // ms
+        maxConcurrentLoads: 3, // Only load 3 images at a time
+        retryAttempts: 2
     };
     
     // Track which images have been processed
@@ -20,6 +22,45 @@ const ImageHandler = (function() {
     
     // IntersectionObserver instance
     let observer = null;
+    
+    let loadQueue = [];
+    let activeLoads = 0;
+    
+    // Process next items in the queue
+    const processQueue = function() {
+        if (loadQueue.length === 0 || activeLoads >= config.maxConcurrentLoads) return;
+        
+        while (loadQueue.length > 0 && activeLoads < config.maxConcurrentLoads) {
+            const imgElement = loadQueue.shift();
+            activeLoads++;
+            
+            // Actually load the image
+            doLoadImage(imgElement)
+                .finally(() => {
+                    activeLoads--;
+                    // Process next batch when this one finishes
+                    setTimeout(processQueue, 10);
+                });
+        }
+    };
+    
+    // Actual image loading logic
+    const doLoadImage = function(imgElement) {
+        const imgSrc = imgElement.dataset.src;
+        
+        // If source is empty or just a partial ID (like "00044_"), use placeholder
+        if (!imgSrc || imgSrc.match(/images_scraped\/\d{5}_$/)) {
+            imgElement.src = config.placeholderPath;
+            imgElement.classList.add('error-image');
+            return Promise.resolve(imgElement);
+        }
+        
+        // Mark as processed
+        processedImages.add(imgElement);
+        
+        // Load the image
+        return loadImage(imgSrc, imgElement);
+    };
     
     /**
      * Initialize the Intersection Observer
@@ -55,6 +96,9 @@ const ImageHandler = (function() {
      */
     const imageExists = function(url) {
         return new Promise((resolve) => {
+            // Make sure URL is properly encoded
+            const encodedUrl = url.includes('%') ? url : encodeURI(url);
+            
             const img = new Image();
             
             img.onload = function() { 
@@ -66,7 +110,7 @@ const ImageHandler = (function() {
             };
             
             // Set cache-busting parameter for better testing
-            img.src = url + (url.includes('?') ? '&' : '?') + '_cache=' + new Date().getTime();
+            img.src = encodedUrl + '?_cache=' + new Date().getTime();
         });
     };
     
@@ -166,25 +210,41 @@ const ImageHandler = (function() {
          * @return {Object} - ImageHandler instance for chaining
          */
         setupLazyLoading: function() {
-            // Initialize observer
-            const observer = initObserver();
-            
-            // Find all images with data-src attribute
-            document.querySelectorAll('img[data-src]:not([data-observed])').forEach(img => {
-                // Mark as observed to prevent double processing
-                img.setAttribute('data-observed', 'true');
-                
-                // Set native lazy loading attribute for browsers that support it
-                img.setAttribute('loading', 'lazy');
-                
-                // Add loading class initially
-                img.classList.add(config.loadingClass);
-                
-                // Observe the image
-                observer.observe(img);
+            // First, prioritize currently visible images
+            const visibleImages = Array.from(document.querySelectorAll('img[data-src]')).filter(img => {
+                const rect = img.getBoundingClientRect();
+                return (
+                    rect.top >= -100 &&
+                    rect.left >= 0 &&
+                    rect.bottom <= (window.innerHeight + 100) &&
+                    rect.right <= window.innerWidth
+                );
             });
             
-            return this;
+            // Load visible images immediately
+            visibleImages.forEach(img => this.loadImage(img));
+            
+            // Then set up observer for remaining images
+            const options = {
+                // Adjust rootMargin to start loading images before they enter the viewport
+                rootMargin: '200px 0px', // Load images 200px before they come into view
+                threshold: 0.01 // Trigger when even a small part of the image is visible
+            };
+            
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        this.loadImage(img);
+                        observer.unobserve(img); // Stop observing once loaded
+                    }
+                });
+            }, options);
+            
+            // Observe all images with data-src attribute
+            document.querySelectorAll('img[data-src]').forEach(img => {
+                observer.observe(img);
+            });
         },
         
         /**
@@ -193,18 +253,44 @@ const ImageHandler = (function() {
          * @param {HTMLImageElement} imgElement - Image element
          * @return {Promise} - Promise resolving when image loading is complete
          */
-        loadImage: function(imagePath, imgElement) {
-            // Skip if no path
-            if (!imagePath) {
-                applyErrorState(imgElement, imgElement.alt);
-                return Promise.resolve(false);
+        loadImage: function(imgElement) {
+            if (!imgElement || !imgElement.dataset.src) {
+                return Promise.reject('Invalid image element');
             }
             
-            // Mark as processed
-            processedImages.add(imgElement);
-            
-            // Load the image
-            return loadImage(imagePath, imgElement);
+            return new Promise((resolve, reject) => {
+                const src = imgElement.dataset.src;
+                
+                // Check if image source is empty or already loaded
+                if (!src || imgElement.classList.contains('loaded')) {
+                    resolve(imgElement);
+                    return;
+                }
+                
+                // Set actual src from data-src
+                imgElement.onload = function() {
+                    // Mark as loaded and remove placeholder
+                    imgElement.classList.add('loaded');
+                    
+                    // If there's a loading indicator, hide it
+                    const loadingIndicator = imgElement.nextElementSibling;
+                    if (loadingIndicator && loadingIndicator.classList.contains('loading-indicator')) {
+                        loadingIndicator.style.display = 'none';
+                    }
+                    
+                    resolve(imgElement);
+                };
+                
+                imgElement.onerror = function() {
+                    console.warn('Failed to load image:', src);
+                    imgElement.src = './images/placeholder.svg';
+                    imgElement.classList.add('error');
+                    resolve(imgElement); // Resolve anyway to prevent promise chain issues
+                };
+                
+                // Set the actual src to trigger loading
+                imgElement.src = src;
+            });
         },
         
         /**

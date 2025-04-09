@@ -56,7 +56,9 @@ const DataLoader = (function() {
                     url: item.URL || '',
                     
                     // Generate image paths - add safety check for ID
-                    imagePath: item.ID ? `./images_scraped/${item.ID}.jpg` : null,
+                    imagePath: item.Filename ? `./images_scraped/${item.Filename}` : 
+                              (item.ID ? `./images_scraped/${String(item.ID).padStart(5, '0')}_${item.Title.replace(/\s+/g, '_')}_${item.Size.replace(/\s+/g, '_')}_$${item.Price}.jpg` : 
+                              './images/placeholder.svg'),
                     
                     // Display properties
                     displaySize: item.Framed_Size ? `Framed Size: ${item.Framed_Size}` : 

@@ -54,9 +54,9 @@ git push
 
 ## ✅ MODULE CHECKLIST
 
-- [ ] 01 - Data modules (dataModel & dataController)
-- [ ] 02 - CSV parsing with error handling
-- [ ] 03 - Filter panel structure
+- [X] 01 - Data modules (dataModel & dataController)
+- [X] 02 - CSV parsing with error handling
+- [X] 03 - Filter panel structure
 - [ ] 04 - Filter UI controls
 - [ ] 05 - Filter integration logic with reactivity
 
@@ -64,3 +64,36 @@ git push
 
 Work step-by-step and commit after each successful module.
 You’re not just filtering data—you’re building an interactive, client-side art experience.
+
+---
+
+## Gallery Implementation Requirements
+
+Implement a gallery with the following specific requirements:
+- Use flexbox layout (not CSS grid) with flex: 0 0 220px for items
+- Each artwork must be exactly 240px tall with zero margins
+- Use an 8px gap between items
+- Images must maintain aspect ratio with object-fit: contain
+- No captions should affect the layout (hide if needed)
+
+Ensure code works across browsers by:
+- Avoiding CSS properties with inconsistent implementation
+- Using feature detection for modern JavaScript features
+- Including appropriate polyfills
+- Testing scroll behavior with different window sizes
+- Using standard event models that work in all major browsers
+
+Implement these fallbacks to ensure robust behavior:
+- Basic rendering if virtual scrolling fails
+- Default image placeholders if images don't load
+- Alternative layout for extreme window sizes
+- User notifications for any processing delays
+- Degraded but functional experience without JavaScript
+
+The gallery must meet these performance targets:
+- First batch of images visible within 500ms
+- Smooth scrolling at 60fps when loading new batches
+- Memory usage under 100MB for 1,000 images
+- No layout shifts when new items are added
+- Idle CPU usage under 5% during scrolling
+

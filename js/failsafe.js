@@ -233,3 +233,49 @@ const Failsafe = (function() {
         }
     };
 })();
+
+/**
+ * Aggressively suppress offline warnings
+ */
+(function suppressOfflineWarnings() {
+    // Force online status
+    Object.defineProperty(navigator, 'onLine', {
+        get: function() { return true; },
+        configurable: true
+    });
+    
+    // Capture and block offline events
+    window.addEventListener('offline', function(e) {
+        e.stopImmediatePropagation();
+        e.preventDefault();
+        return false;
+    }, true);
+    
+    // Find and remove offline messages periodically
+    function removeOfflineMessages() {
+        // Common selectors for offline messages
+        const possibleOfflineElements = document.querySelectorAll('[class*="offline"], [id*="offline"], [aria-label*="offline"], [data-*="offline"]');
+        possibleOfflineElements.forEach(el => {
+            if (el.parentNode) {
+                el.style.display = 'none';
+            }
+        });
+        
+        // Find elements with offline text
+        document.querySelectorAll('body *').forEach(el => {
+            if (el.childNodes && el.childNodes.length > 0) {
+                for (let i = 0; i < el.childNodes.length; i++) {
+                    const node = el.childNodes[i];
+                    if (node.nodeType === 3 && node.nodeValue && node.nodeValue.toLowerCase().includes('offline')) {
+                        const parent = node.parentNode;
+                        if (parent) parent.style.display = 'none';
+                    }
+                }
+            }
+        });
+    }
+    
+    // Run immediately and then every 2 seconds
+    removeOfflineMessages();
+    setInterval(removeOfflineMessages, 2000);
+})();

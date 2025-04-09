@@ -1,11 +1,75 @@
 /**
- * Main application entry point - implements enhanced MVC architecture
+ * Main Application Controller
+ * 
+ * Implements an enhanced MVC architecture with:
+ * - DataController: Handles CSV data loading and parsing
+ * - View: Manages UI rendering and user interactions
+ * - FilterModule: Processes filtering logic
+ * 
+ * The application flow:
+ * 1. Initialize core components
+ * 2. Load artwork data from CSV
+ * 3. Render gallery with initial batch of images
+ * 4. Set up event listeners for filtering and scrolling
+ * 5. Handle image loading as user scrolls
+ * 
+ * Browser compatibility: Chrome, Firefox, Safari, Edge
  */
+
+/* global DataLoader, ImageHandler, DataController, FilterModule, VirtualScroll */
 
 (function() {
     'use strict';
 
-    // Model - Handles data and business logic with observable properties
+    // Track initialization status in a more reliable way
+    window._appState = window._appState || {
+        initialized: false,
+        galleryContainerCreated: false,
+        initTime: Date.now()
+    };
+
+    // More aggressive offline prevention for development
+    (function() {
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            // Override navigator.onLine
+            Object.defineProperty(navigator, 'onLine', {
+                get: function() {
+                    return true; 
+                },
+                configurable: true
+            });
+            
+            // Prevent offline events
+            const preventOffline = function(e) {
+                e.stopImmediatePropagation();
+                e.preventDefault();
+                console.log('Prevented offline mode in development');
+                return false;
+            };
+            
+            window.addEventListener('offline', preventOffline, true);
+            
+            // Find and remove any offline warning messages
+            setTimeout(function removeOfflineWarnings() {
+                const messages = document.querySelectorAll('.offline-warning, [data-offline="true"], .offline-message');
+                messages.forEach(el => el.remove());
+                
+                // Also check for text content
+                document.querySelectorAll('*').forEach(el => {
+                    if (el.textContent && el.textContent.includes('You are currently offline')) {
+                        el.style.display = 'none';
+                    }
+                });
+                
+                // Repeat check after a delay (in case warnings appear after initial load)
+                setTimeout(removeOfflineWarnings, 2000);
+            }, 500);
+        }
+    })();
+
+    // 1. UTILITY FUNCTIONS
+
+    // 2. MODEL DEFINITION
     const Model = {
         // Observable state with data binding
         state: null,
@@ -81,7 +145,7 @@
         }
     };
 
-    // View - Handles UI rendering with component architecture
+    // 3. VIEW DEFINITION 
     const View = {
         // Components collection
         components: {},
@@ -193,91 +257,63 @@
         // Update the renderArtwork method in View object for a cleaner structure
 
         renderArtwork: function(artwork) {
+            // Ensure image paths are properly URL-encoded
+            const safeImagePath = artwork.imagePath ? 
+                artwork.imagePath.includes('%') ? artwork.imagePath : encodeURI(artwork.imagePath) 
+                : './images/placeholder.svg';
+
             return `
-                <article class="artwork" data-id="${artwork.id}" tabindex="0" 
-                        aria-label="Artwork: ${artwork.title} by ${artwork.artist}">
-                    <!-- Artwork image container -->
-                    <div class="artwork-image-wrapper">
-                        <a href="${artwork.url}" class="artwork-link" 
-                           target="_blank" rel="noopener noreferrer"
-                           aria-label="View full details of ${artwork.title} by ${artwork.artist}">
-                            <div class="artwork-image-container">
-                                <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'></svg>" 
-                                    data-src="${artwork.imagePath}" 
-                                    alt="${artwork.title} by ${artwork.artist}" 
-                                    class="artwork-image"
-                                    loading="lazy"
-                                />
-                                <div class="loading-indicator">
-                                    <div class="loading-shimmer"></div>
-                                </div>
-                            </div>
-                        </a>
-                        
-                        <!-- Caption toggle button -->
-                        <button type="button" class="caption-toggle" 
-                                aria-label="Toggle details for ${artwork.title}" 
-                                aria-expanded="false"
-                                aria-controls="caption-${artwork.id}">
-                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                <path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"/>
-                            </svg>
-                        </button>
+                <article class="artwork" data-id="${artwork.id}">
+                    <div class="artwork-image-container" style="aspect-ratio: ${artwork.aspectRatio || '1 / 1'}">
+                        <img 
+                            src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'></svg>" 
+                            data-src="${safeImagePath}" 
+                            alt="${artwork.title} by ${artwork.artist}" 
+                            class="artwork-image"
+                            loading="lazy"
+                            onerror="this.onerror=null; this.src='./images/placeholder.svg';"
+                        />
+                        <div class="loading-indicator"></div>
                     </div>
                     
-                    <!-- Artwork details/caption -->
+                    <!-- Rest of your artwork card structure -->
                     <div class="artwork-details">
-                        <!-- Always visible information -->
-                        <h3 class="artwork-title" id="title-${artwork.id}">${artwork.title}</h3>
+                        <h3 class="artwork-title">${artwork.title}</h3>
                         <p class="artwork-artist">${artwork.artist}</p>
-                        
-                        <!-- Hidden caption content (toggleable) -->
-                        <div class="caption-details" id="caption-${artwork.id}" aria-labelledby="title-${artwork.id}">
-                            ${artwork.technique ? `<p class="artwork-technique"><span class="caption-label">Technique:</span> ${artwork.technique}</p>` : ''}
-                            ${artwork.displaySize ? `<p class="artwork-size">${artwork.displaySize}</p>` : ''}
-                            ${artwork.price ? `<p class="artwork-price"><span class="caption-label">Price:</span> ${artwork.price}</p>` : ''}
+                        <!-- Caption toggle and other elements -->
+                        <div class="caption-details">
+                            ${artwork.technique ? `<p class="artwork-technique">${artwork.technique}</p>` : ''}
+                            ${artwork.size ? `<p class="artwork-size">Dimensions: ${artwork.size}</p>` : ''}
+                            ${artwork.framedSize ? `<p class="artwork-framed-size">Framed: ${artwork.framedSize}</p>` : ''}
+                            ${artwork.price ? `<p class="artwork-price">Price: ${artwork.price}</p>` : ''}
                         </div>
                     </div>
                 </article>
             `;
         },
 
-        // Update the gallery container structure
-        renderGallery: function(artworks) {
-            const galleryEl = document.getElementById('app-content');
-            
-            // Show loading state initially
-            galleryEl.innerHTML = `
-                <div class="gallery-loading" aria-label="Loading gallery">
-                    <div class="gallery-loading-spinner" role="status" aria-hidden="true"></div>
-                    <span class="sr-only">Loading artworks...</span>
-                </div>
+        // Update image rendering in your template:
+
+        renderArtwork: function(artwork) {
+            return `
+                <article class="artwork" data-id="${artwork.id}">
+                    <div class="artwork-image-container">
+                        <!-- Add low-quality placeholder image -->
+                        <img 
+                            src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzIDIiPjxyZWN0IHdpZHRoPSIzIiBoZWlnaHQ9IjIiIGZpbGw9IiNlZWUiLz48L3N2Zz4=" 
+                            data-src="${artwork.imagePath}" 
+                            alt="${artwork.title} by ${artwork.artist}" 
+                            class="artwork-image"
+                            width="300" 
+                            height="300"
+                            loading="lazy"
+                            onerror="this.onerror=null; this.src='./images/placeholder.svg';"
+                        />
+                        <div class="loading-indicator"></div>
+                    </div>
+                    <!-- Rest of your artwork card structure -->
+                </article>
             `;
-            
-            setTimeout(() => {
-                if (!artworks || artworks.length === 0) {
-                    galleryEl.innerHTML = '<div class="no-results" role="status" aria-live="polite">No artworks available</div>';
-                    return;
-                }
-                
-                galleryEl.innerHTML = `
-                    <section class="gallery-container">
-                        <h2 class="gallery-title">Federation Gallery</h2>
-                        <p class="gallery-subtitle">A curated collection of fine artworks</p>
-                        
-                        <div class="gallery-grid" role="region" aria-label="Artwork gallery">
-                            ${artworks.map(artwork => this.renderArtwork(artwork)).join('')}
-                        </div>
-                    </section>
-                `;
-                
-                // Setup lazy loading for all images
-                ImageHandler.setupLazyLoading();
-                
-                // Initialize other interactive elements
-                this.initCaptionToggles();
-                this.setupKeyboardNavigation();
-            }, 400);
         },
 
         // Add this new method for caption toggling
@@ -295,239 +331,580 @@
                     this.setAttribute('aria-expanded', isExpanded);
                 });
             });
-        }
-    };
+        },
 
-    // Controller - Handles user interactions and updates model/view
-    const Controller = {
-        // Initialize the controller
-        init: function() {
-            // Initialize Model and View
-            Model.init();
-            View.init();
+        /**
+         * Show loading indicator with progress
+         * @param {number} progress - Loading progress (0-100)
+         */
+        showLoading: function(progress) {
+            const appContent = document.getElementById('app-content');
+            if (!appContent) return;
             
-            // Setup routes
-            this.setupRoutes();
+            // Check if loading indicator already exists
+            let loadingEl = document.getElementById('data-loading-indicator');
             
-            // Setup scroll handling for lazy loading
-            this.setupScrollHandling();
-            
-            // Load data and render gallery
-            Model.loadData()
-                .then(artworks => {
-                    // Display the gallery once data is loaded
-                    View.renderGallery(Model.state.artworks);
-                    
-                    // After a short delay, prefetch images for items currently in viewport
-                    setTimeout(() => {
-                        const handleScroll = document.createEvent('Event');
-                        handleScroll.initEvent('scroll', true, true);
-                        window.dispatchEvent(handleScroll);
-                    }, 500);
-                })
-                .catch(error => {
-                    console.error('Failed to load artwork data:', error);
-                    document.getElementById('app-content').innerHTML = 
-                        '<div class="error-message">Failed to load gallery data. Please try again later.</div>';
-                });
-            
-            return this;
-        },
-        
-        // Set up routes
-        setupRoutes: function() {
-            Router.registerRoute('#home', () => {
-                View.renderGallery(Model.state.artworks);
-            });
-            
-            Router.registerRoute('#notfound', () => {
-                document.getElementById('app-content').innerHTML = 
-                    '<div class="not-found">Page not found. <a href="#home">Return to gallery</a></div>';
-            });
-            
-            // Set default route
-            Router.setDefaultRoute('#home');
-            
-            // Initialize router
-            Router.init();
-        },
-        
-        // Set up data bindings between model and view
-        setupBindings: function() {
-            // Bind model state to view render
-            DataBinding.bind(
-                this.model.state,
-                'isLoading',
-                this.view.elements.app,
-                (element, value) => this.view.render(this.model.state)
-            );
-            
-            DataBinding.bind(
-                this.model.state,
-                'items',
-                this.view.elements.app,
-                (element, value) => this.view.render(this.model.state)
-            );
-            
-            DataBinding.bind(
-                this.model.state,
-                'selectedItem',
-                this.view.elements.app,
-                (element, value) => this.view.render(this.model.state)
-            );
-            
-            DataBinding.bind(
-                this.model.state.settings,
-                'darkMode',
-                this.view.elements.app,
-                (element, value) => this.view.render(this.model.state)
-            );
-            
-            DataBinding.bind(
-                this.model.state.settings,
-                'fontSize',
-                this.view.elements.app,
-                (element, value) => this.view.render(this.model.state)
-            );
-        },
-        
-        // Set up event listeners
-        setupEventListeners: function() {
-            // Listen for online/offline events
-            window.addEventListener('online', this.handleConnectionChange.bind(this));
-            window.addEventListener('offline', this.handleConnectionChange.bind(this));
-            
-            // Event delegation for all UI interactions
-            document.addEventListener('click', this.handleDocumentClick.bind(this));
-            document.addEventListener('change', this.handleDocumentChange.bind(this));
-        },
-        
-        // Handle document click events with delegation
-        handleDocumentClick: function(event) {
-            // Item selection
-            if (event.target.closest('.item')) {
-                const item = event.target.closest('.item');
-                const index = parseInt(item.dataset.index, 10);
+            if (!loadingEl) {
+                // Create loading indicator
+                loadingEl = document.createElement('div');
+                loadingEl.id = 'data-loading-indicator';
+                loadingEl.className = 'data-loading-container';
+                loadingEl.setAttribute('role', 'status');
+                loadingEl.setAttribute('aria-live', 'polite');
                 
-                // Navigate to item detail page
-                Router.navigateTo(`item?id=${index}`);
-            }
-            
-            // Settings toggle
-            if (event.target.closest('#settings-toggle')) {
-                Router.navigateTo('settings');
-            }
-            
-            // Dark mode toggle
-            if (event.target.closest('#dark-mode-toggle')) {
-                this.model.updateSettings({
-                    darkMode: event.target.closest('#dark-mode-toggle').checked
-                });
-            }
-        },
-        
-        // Handle document change events with delegation
-        handleDocumentChange: function(event) {
-            // Font size picker
-            if (event.target.matches('#font-size-picker')) {
-                this.model.updateSettings({
-                    fontSize: event.target.value
-                });
-            }
-        },
-        
-        // Handle connection status changes
-        handleConnectionChange: function() {
-            this.checkConnectionStatus();
-        },
-        
-        // Check connection status and update UI accordingly
-        checkConnectionStatus: function() {
-            if (navigator.onLine) {
-                Utils.removeClass(document.body, 'offline');
-                Failsafe.hideOfflineNotification();
+                loadingEl.innerHTML = `
+                    <div class="data-loading-spinner"></div>
+                    <div class="data-loading-text">Loading artwork data...</div>
+                    <div class="data-loading-progress">
+                        <div class="data-loading-progress-bar" style="width: ${progress || 0}%"></div>
+                    </div>
+                `;
+                
+                appContent.innerHTML = '';
+                appContent.appendChild(loadingEl);
             } else {
-                Utils.addClass(document.body, 'offline');
-                Failsafe.showOfflineNotification();
+                // Update existing progress bar
+                const progressBar = loadingEl.querySelector('.data-loading-progress-bar');
+                if (progressBar && typeof progress === 'number') {
+                    progressBar.style.width = `${progress}%`;
+                }
             }
         },
 
-        // Add this to your Controller object's init method
-        setupScrollHandling: function() {
-            // Prioritize images in viewport when scrolling
-            const handleScroll = Utils.throttle(function() {
-                // Check if any unloaded images are now in viewport
-                const unloadedImages = document.querySelectorAll('img[data-src]:not([data-loaded])');
-                
-                unloadedImages.forEach(img => {
-                    if (Utils.isInViewport(img, 300)) {
-                        // Prioritize this image by forcing load
-                        if (img.dataset.src) {
-                            ImageHandler.loadImage(img.dataset.src, img);
+        /**
+         * Hide loading indicator
+         */
+        hideLoading: function() {
+            const loadingEl = document.getElementById('data-loading-indicator');
+            if (loadingEl) {
+                loadingEl.classList.add('fade-out');
+                setTimeout(() => {
+                    if (loadingEl.parentNode) {
+                        loadingEl.parentNode.removeChild(loadingEl);
+                    }
+                }, 500); // Match fade-out animation duration
+            }
+        },
+
+        /**
+         * Show error message
+         * @param {string} message - Error message to display
+         */
+        showError: function(message) {
+            const appContent = document.getElementById('app-content');
+            if (!appContent) return;
+            
+            this.hideLoading();
+            
+            const errorEl = document.createElement('div');
+            errorEl.className = 'data-error-container';
+            errorEl.setAttribute('role', 'alert');
+            
+            errorEl.innerHTML = `
+                <div class="data-error-icon">⚠️</div>
+                <div class="data-error-message">${message || 'An error occurred while loading data.'}</div>
+                <button class="data-error-retry">Retry</button>
+            `;
+            
+            appContent.innerHTML = '';
+            appContent.appendChild(errorEl);
+            
+            // Add retry button click handler
+            const retryButton = errorEl.querySelector('.data-error-retry');
+            if (retryButton) {
+                retryButton.addEventListener('click', function() {
+                    Controller.loadData();
+                });
+            }
+        },
+
+        /**
+         * Setup keyboard navigation for gallery items
+         */
+        setupKeyboardNavigation: function() {
+            // Get all artwork elements
+            const artworkElements = document.querySelectorAll('.artwork');
+            
+            // Add keyboard navigation
+            artworkElements.forEach(artwork => {
+                artwork.addEventListener('keydown', function(e) {
+                    // Handle Enter or Space to toggle caption
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        const toggleButton = this.querySelector('.caption-toggle');
+                        if (toggleButton) {
+                            toggleButton.click();
                         }
                     }
                 });
-            }, 200); // Throttle to every 200ms
+            });
             
-            // Add scroll listener
-            window.addEventListener('scroll', handleScroll);
+            // Log completion
+            console.log('Keyboard navigation set up for', artworkElements.length, 'gallery items');
+        },
+
+        /**
+         * Setup interactive behavior for artwork items
+         */
+        setupArtworkInteractions: function() {
+            // Find all toggle buttons
+            const toggleButtons = document.querySelectorAll('.caption-toggle');
             
-            // Also check on resize
-            window.addEventListener('resize', Utils.throttle(handleScroll, 500));
+            // Add click handlers to toggle buttons
+            toggleButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Find the parent artwork element
+                    const artwork = this.closest('.artwork');
+                    if (!artwork) return;
+                    
+                    // Find the caption details element
+                    const details = artwork.querySelector('.caption-details');
+                    if (!details) return;
+                    
+                    // Toggle expanded state
+                    const isExpanded = details.classList.toggle('expanded');
+                    
+                    // Update accessibility attributes
+                    this.setAttribute('aria-expanded', isExpanded);
+                    
+                    // Update the toggle icon
+                    const icon = this.querySelector('.caption-toggle-icon');
+                    if (icon) {
+                        icon.textContent = isExpanded ? '▲' : '▼';
+                    }
+                });
+            });
             
-            // Initial check for visible images
-            handleScroll();
+            // Make artwork items focusable with keyboard
+            document.querySelectorAll('.artwork').forEach(artwork => {
+                artwork.setAttribute('tabindex', '0');
+                
+                // Add keyboard support
+                artwork.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        const toggle = this.querySelector('.caption-toggle');
+                        if (toggle) toggle.click();
+                    }
+                });
+            });
+            
+            return this; // For method chaining
+        },
+
+        // Add this method to your View object:
+        initializeImageLoading: function() {
+            console.log('Initializing image loading');
+            
+            // Use multiple selectors to find all possible images
+            const images = document.querySelectorAll(
+                'img[data-src]:not(.loaded), ' + 
+                '.artwork-image:not(.loaded), ' +
+                '.gallery-container img:not(.loaded)'
+            );
+            
+            console.log(`Found ${images.length} images to load`);
+            
+            // If no images found or VirtualScroll is handling them, don't continue
+            if (images.length === 0 || window.VirtualScroll) {
+                console.log('No images to load or VirtualScroll is handling image loading');
+                return;
+            }
+            
+            // Load images in batches of 5
+            let index = 0;
+            const batchSize = 5;
+            
+            function loadNextBatch() {
+                const endIndex = Math.min(index + batchSize, images.length);
+                
+                for (let i = index; i < endIndex; i++) {
+                    const img = images[i];
+                    const dataSrc = img.getAttribute('data-src');
+                    
+                    if (!dataSrc) continue;
+                    
+                    // Create image loader
+                    const imgLoader = new Image();
+                    
+                    imgLoader.onload = function() {
+                        img.src = dataSrc;
+                        img.classList.add('loaded');
+                        img.classList.remove('loading-image');
+                        
+                        // Hide loading indicator if present
+                        const container = img.closest('.artwork-image-container');
+                        if (container) {
+                            const indicator = container.querySelector('.loading-indicator');
+                            if (indicator) indicator.style.display = 'none';
+                        }
+                    };
+                    
+                    imgLoader.onerror = function() {
+                        console.warn(`Failed to load image: ${dataSrc}`);
+                        img.classList.add('error');
+                    };
+                    
+                    // Begin loading
+                    imgLoader.src = dataSrc;
+                }
+                
+                // Load next batch if there are more images
+                index = endIndex;
+                if (index < images.length) {
+                    setTimeout(loadNextBatch, 200);
+                }
+            }
+            
+            // Start loading first batch
+            loadNextBatch();
+        },
+
+        /**
+         * Render artwork gallery with virtual scrolling support
+         * @param {Array} artworks - Array of artwork objects to display
+         */
+        renderGallery: function(artworks) {
+            console.log(`Rendering gallery with ${artworks.length} artworks`);
+            
+            // Find or create gallery container
+            let galleryContainer = document.getElementById('gallery-container');
+            
+            if (!galleryContainer) {
+                // Only log this once and track when it happens
+                if (!window._appState.galleryContainerCreated) {
+                    console.log('Creating gallery container (first time)');
+                    window._appState.galleryContainerCreated = true;
+                }
+                
+                // Rest of your container creation code...
+                const contentLayout = document.querySelector('.content-layout');
+                const appContent = document.getElementById('app-content');
+                const app = document.getElementById('app');
+                
+                // Use whichever container is available
+                const parentContainer = contentLayout || appContent || app || document.body;
+                
+                // Create gallery container
+                galleryContainer = document.createElement('div');
+                galleryContainer.id = 'gallery-container';
+                galleryContainer.className = 'gallery-container';
+                
+                // Append to parent
+                parentContainer.appendChild(galleryContainer);
+            }
+            
+            // Clear existing content
+            galleryContainer.innerHTML = '';
+            
+            // Check if we have artworks
+            if (!artworks || !artworks.length) {
+                galleryContainer.innerHTML = '<div class="no-results">No artworks found matching your criteria.</div>';
+                return;
+            }
+            
+            // Debug VirtualScroll availability
+            console.log('VirtualScroll available:', typeof window.VirtualScroll !== 'undefined');
+            
+            // Use VirtualScroll if available
+            if (window.VirtualScroll && typeof window.VirtualScroll.init === 'function') {
+                console.log('Using VirtualScroll to render items');
+                VirtualScroll.init(galleryContainer, artworks);
+            } else {
+                console.log('VirtualScroll module not available - falling back to basic rendering');
+                
+                // Force the use of our basic flexbox rendering that works well
+                console.log(`Rendering gallery with flexbox layout (${artworks.length} items)`);
+                
+                // Clear the container
+                galleryContainer.innerHTML = '';
+                
+                // Apply the proven working styles
+                galleryContainer.style.cssText = `
+                    display: flex !important;
+                    flex-wrap: wrap !important;
+                    gap: 8px !important;
+                    padding: 0 !important;
+                    margin: 0 !important;
+                `;
+                
+                // Basic rendering - just show first 20 items
+                const maxItems = Math.min(20, artworks.length);
+                console.log(`Rendering first ${maxItems} of ${artworks.length} items in basic mode`);
+                
+                for (let i = 0; i < maxItems; i++) {
+                    const artwork = artworks[i];
+                    const element = document.createElement('div');
+                    element.className = 'artwork';
+                    element.setAttribute('data-id', artwork.id || `art-${i}`);
+                    
+                    element.innerHTML = `
+                        <div class="artwork-image-container">
+                            <img 
+                                class="artwork-image loading-image" 
+                                src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzIDIiPjxyZWN0IHdpZHRoPSIzIiBoZWlnaHQ9IjIiIGZpbGw9IiNlZWUiLz48L3N2Zz4=" 
+                                data-src="${artwork.imagePath}" 
+                                alt="${artwork.title || 'Artwork'} by ${artwork.artist || 'Unknown Artist'}"
+                                width="200"
+                                height="200"
+                            >
+                            <div class="loading-indicator">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+                        <div class="artwork-details">
+                            <h3 class="artwork-title">${artwork.title || 'Untitled'}</h3>
+                            <p class="artwork-artist">${artwork.artist || 'Unknown Artist'}</p>
+                            ${artwork.price ? `<p class="artwork-price">$${artwork.price}</p>` : ''}
+                        </div>
+                    `;
+                    
+                    galleryContainer.appendChild(element);
+                }
+            }
+            
+            // After rendering, initialize image loading with slight delay
+            setTimeout(() => {
+                this.initializeImageLoading();
+            }, 500);
+            
+            console.log(`Gallery rendered with ${galleryContainer.children.length} items`);
+
+            // Ensure content-layout exists
+            let contentLayout = document.querySelector('.content-layout');
+            if (!contentLayout) {
+                console.log('Creating missing content-layout container');
+                contentLayout = document.createElement('div');
+                contentLayout.className = 'content-layout';
+                
+                const appContent = document.getElementById('app-content');
+                if (appContent) {
+                    // Either insert as first child or wrap existing content
+                    if (appContent.children.length > 0) {
+                        // Wrap existing content
+                        while (appContent.children.length > 0) {
+                            contentLayout.appendChild(appContent.children[0]);
+                        }
+                    }
+                    appContent.appendChild(contentLayout);
+                }
+            }
         }
     };
-
-    // Add this function inside your init method
-    function initSplashScreen() {
-        // Set current date in splash screen
-        const dateElement = document.getElementById('splash-date');
-        const options = { 
-            weekday: 'long',
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-        };
-        dateElement.textContent = new Date().toLocaleDateString(undefined, options);
+    
+    // 4. CONTROLLER DEFINITION
+    const Controller = (function() {
+        // Private variables - inside the IIFE, not the object literal
+        let allArtworks = [];
         
-        // Hide splash screen after animation completes
-        setTimeout(() => {
-            const splashScreen = document.getElementById('splash-screen');
-            splashScreen.classList.add('hidden');
+        // Return the public API with all methods as properties
+        return {
+            /**
+             * Initialize the application
+             */
+            init: function() {
+                // Prevent multiple initialization
+                if (this._initialized) {
+                    console.log('Controller already initialized, skipping');
+                    return;
+                }
+                this._initialized = true;
+                
+                console.log('Initializing application');
+                
+                // Initialize filter toggle FIRST
+                this.initFilterToggle();
+                
+                // Then load data
+                this.loadData()
+                    .catch(error => {
+                        console.error('Failed to initialize application:', error);
+                    });
+            },
             
-            // Remove splash screen from DOM after transition
+            /**
+             * Initialize filter toggle functionality
+             */
+            initFilterToggle: function() {
+                console.log('Initializing filter toggle functionality');
+                
+                const toggleButton = document.getElementById('toggle-filters');
+                const filterPanel = document.getElementById('filter-panel');
+                
+                if (!toggleButton || !filterPanel) {
+                    console.error('Filter toggle elements not found');
+                    return;
+                }
+                
+                console.log('Filter toggle elements found');
+                
+                // Set initial state (collapsed by default)
+                toggleButton.setAttribute('aria-expanded', 'false');
+                
+                toggleButton.addEventListener('click', function() {
+                    // Get current state
+                    const isExpanded = toggleButton.getAttribute('aria-expanded') === 'true';
+                    
+                    // Toggle state
+                    const newState = !isExpanded;
+                    
+                    // Update button state
+                    toggleButton.setAttribute('aria-expanded', newState);
+                    
+                    // Update filter panel visibility
+                    if (newState) {
+                        filterPanel.classList.remove('collapsed');
+                    } else {
+                        filterPanel.classList.add('collapsed');
+                    }
+                    
+                    // Announce to screen readers
+                    const message = newState ? 'Filter panel expanded' : 'Filter panel collapsed';
+                    const announcer = document.getElementById('sr-announcer');
+                    if (announcer) announcer.textContent = message;
+                    
+                    console.log(message);
+                });
+            },
+            
+            /**
+             * Load artwork data
+             */
+            loadData: function() {
+                console.log('Loading artwork data');
+                
+                // Flag to prevent duplicate render calls
+                if (this._isLoading) {
+                    console.warn('Data loading already in progress');
+                    return Promise.resolve();
+                }
+                
+                this._isLoading = true;
+                
+                // Show loading indicator
+                if (View.showLoading) {
+                    View.showLoading(0);
+                }
+                
+                return DataController.loadData()
+                    .then(artworks => {
+                        this._isLoading = false;
+                        
+                        // Hide loading indicator
+                        if (View.hideLoading) {
+                            View.hideLoading();
+                        }
+                        
+                        // Store artwork data
+                        allArtworks = artworks;
+                        this.allArtworks = artworks;
+                        
+                        // Initialize filters
+                        this.initFilters(artworks);
+                        
+                        // Only render gallery once
+                        if (View.renderGallery) {
+                            View.renderGallery(artworks);
+                        } else {
+                            console.error('View.renderGallery not found');
+                        }
+                        
+                        return artworks;
+                    })
+                    .catch(error => {
+                        this._isLoading = false;
+                        console.error('Failed to load data:', error);
+                        if (View.showError) {
+                            View.showError('Failed to load artwork data');
+                        }
+                        throw error;
+                    });
+            },
+            
+            /**
+             * Initialize filter module
+             */
+            initFilters: function(artworks) {
+                if (typeof FilterModule !== 'undefined' && FilterModule.init) {
+                    console.log('Initializing filter module');
+                    FilterModule.init(artworks);
+                    
+                    // Listen for filter changes
+                    window.addEventListener('filter:change', (event) => {
+                        try {
+                            if (event.detail && event.detail.filters) {
+                                console.log('Filters changed:', event.detail.filters);
+                                
+                                // Apply filters to artwork data
+                                const filteredArtworks = FilterModule.applyFiltersToData(allArtworks);
+                                
+                                // Update gallery
+                                if (View.renderGallery) {
+                                    View.renderGallery(filteredArtworks);
+                                }
+                            }
+                        } catch (error) {
+                            console.error('Error handling filter change:', error);
+                        }
+                    });
+                } else {
+                    console.warn('Filter module not found');
+                }
+            }
+        };
+    })();
+
+    // 5. INITIALIZATION
+    (function setupInitialization() {
+        // Only set up initialization once
+        if (window._hasSetupInit) return;
+        window._hasSetupInit = true;
+        
+        // Only initialize once, regardless of how many times events fire
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeApp, {once: true});
+        } else {
+            // DOM already loaded, initialize now if not already done
+            if (!window._appState.initialized) {
+                setTimeout(initializeApp, 0);
+            }
+        }
+    })();
+
+    function initializeApp() {
+        // Track initialization attempts for debugging
+        window._appState.initAttempts = (window._appState.initAttempts || 0) + 1;
+        
+        // Prevent multiple initialization with timestamp tracking
+        if (window._appState.initialized) {
+            console.log(`Application initialization attempt #${window._appState.initAttempts} - ` + 
+                        `Already initialized at ${new Date(window._appState.initTime).toLocaleTimeString()}`);
+            return;
+        }
+        
+        // Mark as initialized first thing
+        window._appState.initialized = true;
+        window._appState.initTime = Date.now();
+        
+        console.log('DOM ready, initializing application components');
+        
+        // Initialize in order
+        try {
+            if (Model && Model.init) Model.init();
+            if (View && View.init) View.init();
+            
+            // Add slight delay before Controller init
             setTimeout(() => {
-                splashScreen.remove();
-            }, 500);
-        }, 1800); // Match this with the CSS animation duration
+                if (Controller && Controller.init) Controller.init();
+            }, 50);
+        } catch (e) {
+            console.error('Error during application initialization:', e);
+        }
     }
 
-    // Call this function early in your initialization process
-    // For example, in your Controller.init() function or at DOMContentLoaded
-    document.addEventListener('DOMContentLoaded', function() {
-        initSplashScreen();
-        // Load dependencies before initializing the app
-        Promise.all([
-            // Any async initialization can be done here
-        ])
-            .then(() => {
-            // Initialize each MVC component
-                const app = Controller.init(Model.init(), View.init());
-                console.log('App initialized:', app);
-            
-                // Initialize failsafe after app is ready
-                Failsafe.init();
-            
-                // Initialize iOS helpers
-                if (typeof iOSHelpers !== 'undefined') {
-                    iOSHelpers.init();
-                }
-            })
-            .catch(error => {
-                console.error('Application initialization failed:', error);
-                Failsafe.handleError(error, 'Application initialization failed');
-            });
-    });
-})();
+    // 6. EXPOSE TO GLOBAL SCOPE (if needed)
+    window.Model = Model;
+    window.View = View;
+    window.Controller = Controller;
+
+})(); // Single IIFE closure

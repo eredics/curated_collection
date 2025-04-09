@@ -109,7 +109,6 @@ body {
   from {
     width: 0;
   }
-
   to {
     width: 100%;
   }
@@ -126,7 +125,7 @@ body {
   padding: 1rem;
   background-color: #fff;
   border-bottom: 1px solid #eee;
-  box-shadow: 0 1px 3px rgb(0 0 0 / 10%);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 #app-header h1 {
@@ -143,7 +142,7 @@ body {
 
 .content-layout {
   display: flex;
-  flex-direction: column;
+  gap: 1.5rem;
   max-width: 1400px;
   margin: 0 auto;
   padding: 0 1rem;
@@ -163,25 +162,12 @@ body {
   flex: 0 0 250px;
   position: sticky;
   top: 1rem;
-  overflow: hidden; /* This first (shorthand) */
-  overflow-y: auto; /* Then this (specific) */
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
   background-color: #fff;
   border-radius: 8px;
-  box-shadow: 0 2px 5px rgb(0 0 0 / 10%);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   padding: 1.5rem;
-  max-height: 500px; /* When expanded */
-  transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
-  opacity: 1;
-  margin-bottom: 1.5rem;
-}
-
-.filter-panel.collapsed {
-  max-height: 0;
-  opacity: 0;
-  padding-top: 0;
-  padding-bottom: 0;
-  margin-bottom: 0;
-  border: none;
 }
 
 .filter-panel h2 {
@@ -292,185 +278,99 @@ body {
   background-color: #e5e5e5;
 }
 
-/* Filter Controls */
-.filter-controls {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 1rem;
-  padding: 0 1rem;
+/* Gallery Container */
+.gallery-container {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-gap: 1.5rem;
+  padding-bottom: 2rem;
 }
 
-.toggle-filters-button {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  background-color: #f5f5f5;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.toggle-filters-button:hover {
-  background-color: #e8e8e8;
-}
-
-.toggle-filters-button[aria-expanded="true"] {
-  background-color: #3498db;
-  color: white;
-  border-color: #2980b9;
-}
-
-.filter-icon {
-  font-size: 1.1rem;
-}
-
-/**
- * Gallery Styling
- * 
- * Critical style points:
- * - Uses flexbox for gallery container (more reliable than grid)
- * - Fixed dimensions for artwork items (220px × 240px)
- * - Zero margins between items with 8px gap
- * - Image containers use flexbox centering for consistent display
- * - !important flags used to override conflicting styles
- * 
- * Layout strategy:
- * - Container: flex + wrap
- * - Items: fixed size with no margin
- * - Images: object-fit:contain to maintain aspect ratio
- */
-
-/* Gallery Container - Using flexbox layout */
-.gallery-container,
-#gallery-container {
-  display: flex !important;
-  flex-wrap: wrap !important;
-  gap: 8px !important;
-  padding: 0 !important;
-  margin: 0 !important;
-}
-
-/* Artwork items - fixed size with no margin */
+/* Artwork Item */
 .artwork {
-  flex: 0 0 220px !important;
-  height: 240px !important;
-  overflow: hidden !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  border: 1px solid #ddd !important;
-  border-radius: 4px !important;
-  background: #f5f5f5 !important;
-  box-shadow: 0 1px 3px rgb(0 0 0 / 10%) !important;
-  display: block !important;
-  margin-bottom: 16px;
+  position: relative;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  background-color: white;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  overflow: hidden;
+  animation: fade-in 0.4s ease-in-out forwards;
 }
 
-/* Image container - fills the artwork completely */
+.artwork:hover {
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+  transform: translateY(-3px);
+}
+
 .artwork-image-container {
-  width: 100% !important;
-  height: 100% !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  position: relative !important;
-  max-height: 240px !important;
-  min-height: 240px !important;
-  overflow: hidden !important;
-  background-color: #f5f5f5 !important;
-  border-radius: 4px;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background-color: #f5f5f5;
+  border-bottom: 1px solid #eee;
 }
 
-/* Image - maintains aspect ratio */
 .artwork-image {
-  max-width: 100% !important;
-  max-height: 100% !important;
-  object-fit: contain !important;
-  margin: auto !important;
-  width: auto !important;
-  height: auto !important;
-  display: block !important;
-  transition: opacity 0.3s ease;
-}
-
-/* Hide caption elements completely */
-.artwork-details,
-.artwork-title,
-.artwork-artist {
-  display: none !important;
-  height: 0 !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-}
-
-/* 2. Base loading indicator styles (less specific first) */
-.loading-indicator {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  opacity: 1;
+  transition: transform 0.3s ease, opacity 0.3s ease, filter 0.3s ease;
+  background: white;
 }
 
 .artwork-image.loading-image {
-  opacity: 0.2;
-
-  /* Combine any other properties from the duplicate selector */
+  opacity: 0.5;
+  filter: blur(5px);
 }
 
-.artwork-image.loaded {
+.artwork-image.loaded-image {
   opacity: 1;
-
-  /* Combine any other properties from the duplicate selector */
+  filter: blur(0);
 }
 
-/* 4. Properly ordered specificity for loading indicators */
+/* Add some padding to ensure small images don't touch the edges */
+.artwork-image[src*="placeholder.svg"] {
+  padding: 10%;
+}
+
+.loading-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(245, 245, 245, 0.7);
+  z-index: 1;
+}
+
 img.loaded + .loading-indicator {
   display: none;
 }
 
-.artwork-image.loaded + .loading-indicator,
-.artwork-image.error + .loading-indicator {
-  display: none;
-}
-
-/* Compact caption styles */
-
-/* Make the details/caption section much more compact */
 .artwork-details {
-  padding: 0 !important; /* No padding */
-  height: 20px !important; /* Extremely small height */
-  max-height: 20px !important; 
-  min-height: 20px !important; /* Force exact height */
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: center !important;
-  overflow: hidden !important;
-  border-top: 1px solid #eee;
+  padding: 1rem;
+  position: relative;
 }
 
-/* More compact title */
 .artwork-title {
-  font-size: 11px !important; /* Even smaller font */
-  line-height: 1 !important;
-  height: 11px !important; /* Force exact height */
-  padding: 0 4px !important; /* Just horizontal padding */
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin: 0 0 0.5rem;
+  color: #333;
 }
 
-/* Only show title, hide artist */
 .artwork-artist {
-  display: none !important; /* Completely hide artist */
-}
-
-/* Remove any potential extras */
-.artwork-details > *:not(.artwork-title, .artwork-artist) {
-  display: none !important; /* Hide any unexpected elements */
+  font-size: 0.9rem;
+  color: #555;
+  margin: 0 0 1rem;
 }
 
 .caption-toggle {
@@ -517,9 +417,8 @@ img.loaded + .loading-indicator {
 .artwork-size,
 .artwork-price {
   font-size: 0.85rem;
-  margin: 5px 0 0;
-  font-weight: bold;
-  color: #222;
+  margin: 0.5rem 0;
+  color: #666;
 }
 
 /* Animations */
@@ -528,7 +427,6 @@ img.loaded + .loading-indicator {
     opacity: 0;
     transform: translateY(10px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
@@ -536,7 +434,7 @@ img.loaded + .loading-indicator {
 }
 
 /* Media Queries */
-@media (width <= 768px) {
+@media (max-width: 768px) {
   .content-layout {
     flex-direction: column;
   }
@@ -554,7 +452,7 @@ img.loaded + .loading-indicator {
   }
 }
 
-@media (width <= 480px) {
+@media (max-width: 480px) {
   .gallery-container {
     grid-template-columns: 1fr;
   }

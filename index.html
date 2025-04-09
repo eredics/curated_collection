@@ -26,6 +26,32 @@
     <link rel="manifest" href="manifest.json">
     <!-- Link to our stylesheet -->
     <link rel="stylesheet" href="css/styles.css">
+    <!-- Add this in the head section -->
+    <link rel="stylesheet" href="css/loading-states.css">
+    <!-- Add these in the head section -->
+    <link rel="preconnect" href="http://localhost:8000">
+    <link rel="dns-prefetch" href="http://localhost:8000">
+    <!-- Add these to the head section -->
+    <link rel="stylesheet" href="css/filter-panel.css">
+    <!-- Add this in the head section -->
+    <meta http-equiv="origin-trial" content="AvoidLazyLoadingImagesOptOut">
+
+    <!-- Replace all the style tags in your head section with this single consolidated one -->
+
+    <style>
+      /* Critical gallery styles - kept inline for reliability */
+      #gallery-container {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+      }
+      
+      .artwork {
+        flex: 0 0 220px !important;
+        height: 240px !important;
+        margin: 0 !important;
+      }
+    </style>
 </head>
 <body>
     <!-- Skip link for accessibility -->
@@ -45,53 +71,224 @@
     
     <!-- Main application container -->
     <div id="app">
-        <!-- View components will be rendered here -->
-        <header id="app-header" role="banner"></header>
-        <main id="app-content" role="main"></main>
-        <footer id="app-footer" role="contentinfo"></footer>
+        <header id="app-header" role="banner">
+            <h1>Curated Collection</h1>
+        </header>
+        <main id="app-content" role="main">
+            <div class="content-layout">
+                <!-- Filter controls -->
+                <div class="filter-controls">
+                    <button id="toggle-filters" class="toggle-filters-button" aria-expanded="false" aria-controls="filter-panel">
+                        <span class="filter-icon">🔍</span> Toggle Filters
+                    </button>
+                </div>
+                
+                <!-- Filter panel -->
+                <aside id="filter-panel" class="filter-panel collapsed" aria-label="Artwork filters">
+                    <h2>Filter Artworks</h2>
+                    
+                    <div class="filter-group">
+                        <h3>Artist</h3>
+                        <ul id="artist-filters" class="filter-list">
+                            <li class="filter-loading">Loading artists...</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <h3>Technique</h3>
+                        <ul id="technique-filters" class="filter-list">
+                            <li class="filter-loading">Loading techniques...</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <h3>Price Range</h3>
+                        <div class="price-range">
+                            <div class="price-inputs">
+                                <label>Min: $<input type="number" id="price-min" class="price-input" placeholder="0"></label>
+                                <label>Max: $<input type="number" id="price-max" class="price-input" placeholder="10000"></label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-actions">
+                        <button id="apply-filters" class="filter-button">Apply Filters</button>
+                        <button id="reset-filters" class="filter-button filter-reset">Reset</button>
+                    </div>
+                </aside>
+                
+                <!-- Gallery container -->
+                <div id="gallery-container" class="gallery-container">
+                    <!-- Gallery items will be inserted here by JavaScript -->
+                </div>
+            </div>
+        </main>
     </div>
     
     <!-- Screen reader announcer -->
     <div id="sr-announcer" class="sr-only" aria-live="polite"></div>
     
-    <!-- Scripts loaded in specific order at the end of body -->
+    <!-- Scripts loaded in specific order -->
     <script src="js/libs/papaparse.min.js"></script>
+    <script src="js/failsafe.js"></script>
     <script src="js/constants.js"></script>
     <script src="js/utils.js"></script>
-    <script src="js/failsafe.js"></script>
+    <script src="js/image-handler.js"></script>
     <script src="js/template-engine.js"></script>
     <script src="js/component.js"></script>
     <script src="js/data-binding.js"></script>
     <script src="js/storage.js"></script>
     <script src="js/router.js"></script>
+    <script src="js/dataModel.js"></script>
+    <script src="js/dataController.js"></script>
     <script src="js/data-loader.js"></script>
-    <script src="js/image-handler.js"></script>
+    <script src="js/filter.js"></script>
+    <script src="js/virtual-scroll.js"></script>
     <script src="js/main.js"></script>
-    
-    <!-- Initialize application -->
+
+    <!-- Consolidated initialization script -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize splash screen
-            const dateElement = document.getElementById('splash-date');
-            const options = { 
-                weekday: 'long',
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-            };
-            dateElement.textContent = new Date().toLocaleDateString(undefined, options);
+        // Debug function to check data processing
+        window.debugArtworkData = function() {
+            console.log('=== ARTWORK DEBUG INFO ===');
             
-            // Hide splash screen after animation completes
-            setTimeout(() => {
-                const splashScreen = document.getElementById('splash-screen');
-                splashScreen.classList.add('hidden');
+            // Check gallery container
+            const container = document.getElementById('gallery-container');
+            console.log('Gallery container found:', !!container);
+            console.log('Gallery children count:', container ? container.children.length : 0);
+            
+            // Check first few artworks
+            const artworks = document.querySelectorAll('.artwork');
+            console.log('Total artworks found:', artworks.length);
+            
+            for (let i = 0; i < Math.min(3, artworks.length); i++) {
+                const artwork = artworks[i];
+                const img = artwork.querySelector('.artwork-image');
+                console.log(`Artwork ${i+1}:`, {
+                    id: artwork.getAttribute('data-id'),
+                    imageDataSrc: img ? img.getAttribute('data-src') : 'no image',
+                    imageSrc: img ? img.src : 'no image',
+                    hasLoadedClass: img ? img.classList.contains('loaded') : false
+                });
+            }
+            
+            console.log('Sample image paths:');
+            if (window.allArtworks && window.allArtworks.length) {
+                for (let i = 0; i < Math.min(5, window.allArtworks.length); i++) {
+                    console.log(`Artwork ${i} image path:`, window.allArtworks[i].imagePath);
+                }
+            }
+            
+            console.log('=== END DEBUG INFO ===');
+        };
+        
+        // Single application initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM content loaded, initializing application');
+            console.log('VirtualScroll loaded at initialization:', typeof VirtualScroll !== 'undefined');
+            
+            // Check gallery container exists
+            const galleryExists = !!document.getElementById('gallery-container');
+            console.log('Gallery container in DOM:', galleryExists);
+            
+            // Splash screen handling
+            const splashScreen = document.getElementById('splash-screen');
+            
+            // Initialize controller function
+            function initController() {
+                if (typeof Controller !== 'undefined' && Controller.init) {
+                    console.log('Initializing Controller');
+                    Controller.init();
+                } else {
+                    console.error('Controller not found. Check script loading order.');
+                }
+            }
+            
+            function debugDOMStructure() {
+                console.log('Checking DOM structure before initialization');
                 
-                // Remove splash screen from DOM after transition
+                const app = document.getElementById('app');
+                const appContent = document.getElementById('app-content');
+                const contentLayout = document.querySelector('.content-layout');
+                const galleryContainer = document.getElementById('gallery-container');
+                
+                console.log('Key elements check:');
+                console.log('- app:', !!app);
+                console.log('- app-content:', !!appContent);
+                console.log('- content-layout:', !!contentLayout);
+                console.log('- gallery-container:', !!galleryContainer);
+            }
+            
+            if (splashScreen) {
+                // Update splash screen date
+                const dateElement = document.getElementById('splash-date');
+                if (dateElement) {
+                    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                    dateElement.textContent = new Date().toLocaleDateString(undefined, options);
+                }
+                
+                // Hide splash after delay
                 setTimeout(() => {
-                    splashScreen.remove();
-                }, 500);
-            }, 1800);
+                    splashScreen.classList.add('hidden');
+                    
+                    // Initialize after splash fade
+                    setTimeout(() => {
+                        if (splashScreen.parentNode) {
+                            splashScreen.parentNode.removeChild(splashScreen);
+                        }
+                        
+                        debugDOMStructure();
+                        initController();
+                    }, 500);
+                }, 1500);
+            } else {
+                // No splash, init immediately
+                debugDOMStructure();
+                initController();
+            }
+            
+            // Run debug after a delay
+            setTimeout(window.debugArtworkData, 3000);
         });
     </script>
+
+    <!-- Replace both scroll detection scripts with this single version -->
+<script>
+  // Single consolidated infinite scroll detection
+  (function() {
+    console.log('Setting up optimized infinite scroll');
+    
+    // Single function to check and load more content
+    function checkForMoreContent() {
+      if (window.VirtualScroll && typeof window.VirtualScroll.forceLoad === 'function') {
+        window.VirtualScroll.forceLoad();
+      }
+    }
+    
+    // Initial checks after page load
+    setTimeout(checkForMoreContent, 1000);
+    setTimeout(checkForMoreContent, 2500);
+    
+    // Periodic check for reliability
+    setInterval(checkForMoreContent, 5000);
+    
+    // Efficient scroll listener with debounce
+    let scrollTimeout;
+    window.addEventListener('scroll', function() {
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(function() {
+        const scrollPosition = window.innerHeight + window.scrollY;
+        const contentHeight = document.body.offsetHeight;
+        
+        if (contentHeight - scrollPosition < 500) {
+          checkForMoreContent();
+        }
+      }, 200);
+    });
+    
+    // Also check on resize
+    window.addEventListener('resize', checkForMoreContent);
+  })();
+</script>
 </body>
 </html>

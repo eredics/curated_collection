@@ -10,6 +10,6 @@
 - Required data fields:
   Title, Artist, Membership, Technique, Size, Framed_Size, Price, Total_Score
 
-- Use Framed_Size when available, otherwise fallback to Size
+- Use Framed_Size when available, otherwise fallback to Unframed_Size
 
 - Handle loading errors and provide console/debug logging

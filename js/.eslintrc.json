@@ -1,0 +1,41 @@
+{
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
+  "extends": "eslint:recommended",
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "script"
+  },
+  "globals": {
+    "Papa": "readonly",
+    "DataModel": "readonly",
+    "DataLoader": "readonly",
+    "ImageHandler": "readonly",
+    "Controller": "readonly",
+    "DataController": "readonly",
+    "FilterModule": "readonly",
+    "Utils": "readonly",
+    "CONSTANTS": "readonly",
+    "Failsafe": "readonly",
+    "Router": "readonly",
+    "TemplateEngine": "readonly",
+    "DataBinding": "readonly",
+    "Storage": "readonly",
+    "StorageManager": "readonly"
+  },
+  "rules": {
+    "no-unused-vars": ["warn", {
+      "vars": "all",
+      "args": "after-used",
+      "ignoreRestSiblings": true,
+      "argsIgnorePattern": "^(e|e1|e2|error|reject|resolve|element|value|observer|app|state|data|index)$",
+      "varsIgnorePattern": "^(Component|Utils|CONSTANTS|Failsafe|Router|TemplateEngine|DataBinding|Storage|StorageManager|ASSETS_TO_CACHE|DataController|FilterModule)$"
+    }],
+    "no-undef": "error",
+    "no-duplicate-case": "error",
+    "eqeqeq": "warn",
+    "no-console": "off"
+  }
+}
