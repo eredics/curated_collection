@@ -1,6 +1,7 @@
 /**
- * Enhanced image handling module with lazy loading
+ * Image Handler Module
  */
+ 
 const ImageHandler = (function() {
     'use strict';
     
@@ -23,94 +24,58 @@ const ImageHandler = (function() {
     // IntersectionObserver instance
     let observer = null;
     
-    let loadQueue = [];
-    let activeLoads = 0;
-    
-    // Process next items in the queue
-    const processQueue = function() {
-        if (loadQueue.length === 0 || activeLoads >= config.maxConcurrentLoads) return;
-        
-        while (loadQueue.length > 0 && activeLoads < config.maxConcurrentLoads) {
-            const imgElement = loadQueue.shift();
-            activeLoads++;
-            
-            // Actually load the image
-            doLoadImage(imgElement)
-                .finally(() => {
-                    activeLoads--;
-                    // Process next batch when this one finishes
-                    setTimeout(processQueue, 10);
-                });
-        }
-    };
-    
-    // Actual image loading logic
-    const doLoadImage = function(imgElement) {
-        const imgSrc = imgElement.dataset.src;
-        
-        // If source is empty or just a partial ID (like "00044_"), use placeholder
-        if (!imgSrc || imgSrc.match(/images_scraped\/\d{5}_$/)) {
-            imgElement.src = config.placeholderPath;
-            imgElement.classList.add('error-image');
-            return Promise.resolve(imgElement);
-        }
-        
-        // Mark as processed
-        processedImages.add(imgElement);
-        
-        // Load the image
-        return loadImage(imgSrc, imgElement);
-    };
-    
-    /**
-     * Initialize the Intersection Observer
-     */
-    const initObserver = function() {
-        if (observer) return observer;
-        
-        observer = new IntersectionObserver((entries, observer) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const img = entry.target;
-                    const dataSrc = img.dataset.src;
-                    
-                    if (dataSrc && !processedImages.has(img)) {
-                        loadImage(dataSrc, img);
-                        processedImages.add(img);
-                        observer.unobserve(img);
-                    }
-                }
-            });
-        }, {
-            rootMargin: '200px 0px', // Start loading when image is 200px away
-            threshold: 0.01 // Trigger when at least 1% of the image is visible
-        });
-        
-        return observer;
-    };
-    
     /**
      * Checks if an image exists
      * @param {string} url - Image URL to check
      * @return {Promise} - Promise resolving to boolean
      */
     const imageExists = function(url) {
-        return new Promise((resolve) => {
-            // Make sure URL is properly encoded
-            const encodedUrl = url.includes('%') ? url : encodeURI(url);
-            
+        if (!url || typeof url !== 'string' || url === './images/placeholder.svg') {
+            return Promise.resolve(false);
+        }
+
+        // Properly encode the URL, especially the filename part
+        let encodedUrl = url;
+        if (url.startsWith('./images_scraped/')) {
+            try {
+                const parts = url.split('/');
+                // Decode first in case it's already partially encoded, then re-encode fully
+                const filename = encodeURIComponent(decodeURIComponent(parts.pop() || ''));
+                encodedUrl = parts.join('/') + '/' + filename;
+            } catch (e) {
+                console.error(`Error encoding URL in imageExists: ${url}`, e);
+                // Proceed with potentially problematic URL, might fail
+            }
+        } else {
+            // For non-local URLs, basic encoding might suffice, but be cautious
+            try {
+                encodedUrl = encodeURI(url); // encodeURI is generally safer for full URLs
+            } catch (e) {
+                console.error(`Error encoding URL with encodeURI: ${url}`, e);
+            }
+        }
+
+        // Prevent requests for clearly invalid paths
+        if (!encodedUrl || encodedUrl === './images_scraped/') {
+            console.warn(`Skipping imageExists check for invalid URL: ${url}`);
+            return Promise.resolve(false);
+        }
+
+
+        return new Promise(resolve => {
             const img = new Image();
-            
-            img.onload = function() { 
-                resolve(true); 
+            img.onload = function() {
+                resolve(true);
             };
-            
-            img.onerror = function() { 
-                resolve(false); 
+            img.onerror = function() {
+                // Log the failed URL for debugging
+                console.log(`imageExists check failed for: ${encodedUrl}`);
+                resolve(false);
             };
-            
+
             // Set cache-busting parameter for better testing
-            img.src = encodedUrl + '?_cache=' + new Date().getTime();
+            // Use the correctly encoded URL
+            img.src = encodedUrl + (encodedUrl.includes('?') ? '&' : '?') + '_cache=' + Date.now();
         });
     };
     
@@ -203,7 +168,7 @@ const ImageHandler = (function() {
                 return false;
             });
     };
-    
+
     return {
         /**
          * Setup lazy loading for all images with data-src
@@ -258,7 +223,7 @@ const ImageHandler = (function() {
                 return Promise.reject('Invalid image element');
             }
             
-            return new Promise((resolve, reject) => {
+            return new Promise((resolve, _reject) => {
                 const src = imgElement.dataset.src;
                 
                 // Check if image source is empty or already loaded
@@ -316,27 +281,123 @@ const ImageHandler = (function() {
          * @return {Promise} - Promise resolving to results array
          */
         preloadImages: function(imagePaths, progressCallback) {
-            const validPaths = imagePaths.filter(path => path);
-            let loaded = 0;
-            const total = validPaths.length;
+            if (!Array.isArray(imagePaths) || imagePaths.length === 0) {
+                return Promise.resolve([]);
+            }
             
-            return Promise.all(
-                validPaths.map(path => 
-                    imageExists(path)
-                        .then(exists => {
-                            loaded++;
-                            if (progressCallback) {
-                                progressCallback(loaded / total, exists ? path : null);
-                            }
-                            return { path, exists };
-                        })
-                )
-            );
+            // Only preload the first 10 images (visible in initial view)
+            const initialBatch = imagePaths.slice(0, 10);
+            const remainingBatch = imagePaths.slice(10);
+            
+            // Use prefetch for remaining images instead of preload
+            if (remainingBatch.length > 0) {
+                setTimeout(() => {
+                    this.prefetchImages(remainingBatch);
+                }, 2000); // Delay prefetching to prioritize initial render
+            }
+            
+            // Only preload initial batch
+            return this.preloadImagesCore(initialBatch, progressCallback);
+        },
+
+        // New method to handle prefetching (lower priority than preload)
+        prefetchImages: function(imagePaths) {
+            if (!Array.isArray(imagePaths) || imagePaths.length === 0) return;
+            
+            imagePaths.forEach(path => {
+                if (!path) return;
+                
+                const link = document.createElement('link');
+                link.rel = 'prefetch'; // Use prefetch instead of preload
+                link.as = 'image';
+                link.href = path;
+                link.fetchpriority = 'low';
+                document.head.appendChild(link);
+            });
+        },
+
+        // Core preloading implementation
+        preloadImagesCore: function(imagePaths, progressCallback) {
+            if (!Array.isArray(imagePaths) || imagePaths.length === 0) {
+                return Promise.resolve([]);
+            }
+            
+            const total = imagePaths.length;
+            let completed = 0;
+            
+            // Create array of promises for each image load
+            const promises = imagePaths.map(path => {
+                return new Promise((resolve) => {
+                    // Skip invalid paths
+                    if (!path) {
+                        completed++;
+                        if (progressCallback) {
+                            progressCallback(completed / total);
+                        }
+                        resolve({ path: null, success: false });
+                        return;
+                    }
+                    
+                    // Handle special characters in URLs
+                    let encodedPath = path;
+                    if (path.includes('#')) {
+                        encodedPath = path.replace(/#/g, '%23');
+                    }
+                    if (path.includes('$')) {
+                        encodedPath = encodedPath.replace(/\$/g, '%24');
+                    }
+                    
+                    const img = new Image();
+                    
+                    img.onload = function() {
+                        completed++;
+                        if (progressCallback) {
+                            progressCallback(completed / total);
+                        }
+                        resolve({ path, success: true });
+                    };
+                    
+                    img.onerror = function() {
+                        completed++;
+                        if (progressCallback) {
+                            progressCallback(completed / total);
+                        }
+                        console.warn('Failed to preload image:', path);
+                        resolve({ path, success: false });
+                    };
+                    
+                    img.src = encodedPath;
+                });
+            });
+            
+            return Promise.all(promises);
+        },
+
+        /**
+         * Add a new method for lazy loading
+         * @param {HTMLImageElement} img - Image element
+         */
+        lazyLoadImage: function(img) {
+            if (!img.dataset.src) return;
+            
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        img.src = img.dataset.src;
+                        observer.unobserve(img);
+                    }
+                });
+            });
+            
+            observer.observe(img);
         }
     };
 })();
+window.ImageHandler = ImageHandler;
 
 // Auto-initialize lazy loading when the script loads
 document.addEventListener('DOMContentLoaded', function() {
     ImageHandler.setupLazyLoading();
 });
+
+window.ImageHandler = ImageHandler;

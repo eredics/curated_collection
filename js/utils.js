@@ -1,8 +1,7 @@
 /**
- * Utility functions for the application
- * Collection of helper methods that can be used throughout the app
+ * Utility Module
  */
-
+// eslint-disable-next-line no-unused-vars
 const Utils = (function() {
     'use strict';
     
@@ -83,7 +82,8 @@ const Utils = (function() {
         safeJsonParse: function(jsonString, fallback = {}) {
             try {
                 return JSON.parse(jsonString);
-            } catch (e) {
+            } catch (_e) { // <<< Change 'e' to '_e'
+                console.error("An error occurred:", _e); // You can still use _e if needed for logging
                 // Intentionally silent - return fallback on parsing error
                 console.debug('JSON parse error, using fallback');
                 return fallback;
@@ -99,7 +99,8 @@ const Utils = (function() {
         safeStorageGet: function(accessor, fallback = null) {
             try {
                 return accessor();
-            } catch (e) {
+            } catch (_e) { // <<< Change 'e' to '_e'
+                console.error("An error occurred:", _e); // You can still use _e if needed for logging
                 // Intentionally silent - return fallback on storage error
                 return fallback;
             }
@@ -114,7 +115,8 @@ const Utils = (function() {
         safeExecute: function(fn, fallback = null) {
             try {
                 return fn();
-            } catch (e2) {
+            } catch (_e) { // <<< Change 'e' to '_e'
+                console.error("An error occurred:", _e); // You can still use _e if needed for logging
                 // Intentionally silent - return fallback on execution error
                 return fallback;
             }
@@ -131,7 +133,8 @@ const Utils = (function() {
             try {
                 // Conversion logic here
                 return value;
-            } catch (e) {
+            } catch (_e) { // <<< Change 'e' to '_e'
+                console.error("An error occurred:", _e); // You can still use _e if needed for logging
                 // Intentionally silent - return fallback on conversion error
                 return fallback;
             }
@@ -242,7 +245,8 @@ const Utils = (function() {
                     // Try localStorage first
                     localStorage.setItem(key, JSON.stringify(data));
                     return true;
-                } catch (e) {
+                } catch (_e) { // <<< Change 'e' to '_e'
+                    console.error("An error occurred:", _e); // You can still use _e if needed for logging
                     // Silent fallback for optional feature
                     return false; // Return false instead of undefined fallback
                 }
@@ -258,7 +262,8 @@ const Utils = (function() {
                     // Try localStorage first
                     const item = localStorage.getItem(key);
                     return item ? JSON.parse(item) : null;
-                } catch (e) {
+                } catch (_e) { // <<< Change 'e' to '_e'
+                    console.error("An error occurred:", _e); // You can still use _e if needed for logging
                     // Silent fallback for optional feature
                     return null; // Return null instead of undefined fallback
                 }
@@ -273,13 +278,15 @@ const Utils = (function() {
                 let success = true;
                 try {
                     localStorage.removeItem(key); 
-                } catch (e) {
+                } catch (_e) { // <<< Change 'e' to '_e'
+                    console.error("An error occurred:", _e); // You can still use _e if needed for logging
                     // Silent fallback for optional feature
                     success = false; // Mark as failed but continue
                 }
                 try {
                     sessionStorage.removeItem(key); 
-                } catch (e) {
+                } catch (_e) { // <<< Change 'e' to '_e'
+                    console.error("An error occurred:", _e); // You can still use _e if needed for logging
                     // Silent fallback for optional feature
                     success = false; // Mark as failed but continue
                 }

@@ -1,6 +1,9 @@
+// filepath: /Users/pete5553/Desktop/curated_collection/js/data-loader.js
 /**
- * Data loading module for artwork CSV data
+ * DataLoader Module
+ * Handles fetching and loading data.
  */
+// eslint-disable-next-line no-unused-vars
 const DataLoader = (function() {
     'use strict';
     
@@ -57,12 +60,12 @@ const DataLoader = (function() {
                     
                     // Generate image paths - add safety check for ID
                     imagePath: item.Filename ? `./images_scraped/${item.Filename}` : 
-                              (item.ID ? `./images_scraped/${String(item.ID).padStart(5, '0')}_${item.Title.replace(/\s+/g, '_')}_${item.Size.replace(/\s+/g, '_')}_$${item.Price}.jpg` : 
-                              './images/placeholder.svg'),
+                        (item.ID ? `./images_scraped/${String(item.ID).padStart(5, '0')}_${item.Title.replace(/\s+/g, '_')}_${item.Size.replace(/\s+/g, '_')}_$${item.Price}.jpg` : 
+                            './images/placeholder.svg'),
                     
                     // Display properties
                     displaySize: item.Framed_Size ? `Framed Size: ${item.Framed_Size}` : 
-                                (item.Size ? `Size: ${item.Size}` : '')
+                        (item.Size ? `Size: ${item.Size}` : '')
                 };
                 
                 return processedItem;

@@ -1,7 +1,10 @@
 /**
- * Storage module with multiple storage options and fallbacks
+ * Storage Manager Module
+ * Provides an interface for managing local storage.
  */
-// Rename to avoid collision with built-in Storage API
+ 
+ 
+// eslint-disable-next-line no-redeclare
 const StorageManager = (function() {
     'use strict';
     
@@ -12,7 +15,8 @@ const StorageManager = (function() {
             localStorage.setItem(testKey, testKey);
             localStorage.removeItem(testKey);
             return true;
-        } catch (e) {
+        } catch (_e) {
+            void _e; // Acknowledge intentional non-use
             // Error silently handled: storage operation failed but 
             // application can continue with fallback mechanism
             console.debug('Storage operation failed, using fallback');
@@ -35,14 +39,15 @@ const StorageManager = (function() {
          * @return {Promise} - Resolves when data is stored
          */
         save: function(key, data) {
-            return new Promise((resolve, reject) => {
+            return new Promise((resolve, _reject) => {
                 // Attempt localStorage first if available
                 if (isLocalStorageAvailable) {
                     try {
                         localStorage.setItem(key, JSON.stringify(data));
                         resolve();
                         return;
-                    } catch (e) {
+                    } catch (_e) {
+                        void _e; // Acknowledge intentional non-use
                         console.warn('localStorage save failed, trying IndexedDB');
                     }
                 }
@@ -69,14 +74,16 @@ const StorageManager = (function() {
                             resolve();
                         };
                         
-                        storeRequest.onerror = function(e) {
+                        storeRequest.onerror = function(_e) {
+                            void _e; // Acknowledge intentional non-use
                             console.warn('IndexedDB save failed, using memory storage');
                             memoryStorage[key] = data;
                             resolve();
                         };
                     };
                     
-                    request.onerror = function(e) {
+                    request.onerror = function(_e) {
+                        void _e; // Acknowledge intentional non-use
                         console.warn('IndexedDB open failed, using memory storage');
                         memoryStorage[key] = data;
                         resolve();
@@ -95,7 +102,7 @@ const StorageManager = (function() {
          * @return {Promise} - Resolves with loaded data or null
          */
         load: function(key) {
-            return new Promise((resolve, reject) => {
+            return new Promise((resolve, _reject) => {
                 // Attempt localStorage first if available
                 if (isLocalStorageAvailable) {
                     try {
@@ -104,7 +111,8 @@ const StorageManager = (function() {
                             resolve(JSON.parse(data));
                             return;
                         }
-                    } catch (e) {
+                    } catch (_e) {
+                        void _e; // Acknowledge intentional non-use
                         console.warn('localStorage load failed, trying IndexedDB');
                     }
                 }
@@ -136,13 +144,15 @@ const StorageManager = (function() {
                             }
                         };
                         
-                        storeRequest.onerror = function(e) {
+                        storeRequest.onerror = function(_e) {
+                            void _e; // Acknowledge intentional non-use
                             console.warn('IndexedDB load failed, checking memory storage');
                             resolve(memoryStorage[key] || null);
                         };
                     };
                     
-                    request.onerror = function(e) {
+                    request.onerror = function(_e) {
+                        void _e; // Acknowledge intentional non-use
                         console.warn('IndexedDB open failed, checking memory storage');
                         resolve(memoryStorage[key] || null);
                     };
@@ -155,7 +165,8 @@ const StorageManager = (function() {
     };
 })();
 
-// For backward compatibility
+// Alias for easier access if needed
+// eslint-disable-next-line no-unused-vars, no-redeclare
 const Storage = StorageManager;
 
 // Add this line to explicitly export it as a global

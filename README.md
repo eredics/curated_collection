@@ -345,3 +345,12 @@ Style Overriding: We assumed using !important was necessary to overcome conflict
 Single Data Source: We assumed all artwork data comes from one CSV file with a consistent format
 Modern Browser Features: We assumed support for modern JS/CSS features like flexbox and IntersectionObserver
 Image Availability: We assumed all image paths in the CSV data point to valid, accessible image files
+
+
+
+xImage Naming Pattern
+Based on your description:
+
+Image files in images_scraped folder start with a 5-digit number (00001 to 10443)
+This number corresponds to the "Sort" column in filtered.csv
+The filename number ends at the first underscore

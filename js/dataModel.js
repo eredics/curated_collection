@@ -1,7 +1,8 @@
 /**
  * Data Model Module
- * Stores processed artwork data and provides access methods
+ * Manages the application's data state.
  */
+// eslint-disable-next-line no-unused-vars
 const DataModel = (function() {
     'use strict';
     
@@ -47,9 +48,9 @@ const DataModel = (function() {
     const validateArtwork = function(artwork) {
         if (!artwork || typeof artwork !== 'object') return false;
         
-        // Check for required properties
-        const requiredProps = ['id', 'title', 'artist'];
-        return requiredProps.every(prop => artwork.hasOwnProperty(prop));
+        // Check for required properties using Object.prototype.hasOwnProperty.call
+        const requiredProps = ['Sort', 'Title', 'Artist', 'Filename']; // Use actual required props from CSV
+        return requiredProps.every(prop => Object.prototype.hasOwnProperty.call(artwork, prop) && artwork[prop] != null && artwork[prop] !== ''); // New, safer way + check for non-empty
     };
     
     /**

@@ -1,6 +1,7 @@
 /**
- * Simple data binding system for MVC architecture
+ * Data Binding Module
  */
+ 
 const DataBinding = (function() {
     'use strict';
     
@@ -77,3 +78,4 @@ const DataBinding = (function() {
         }
     };
 })();
+window.DataBinding = DataBinding;

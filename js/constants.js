@@ -2,10 +2,10 @@
  * Application constants
  * Centralizes all string literals and configuration settings
  */
-
+ 
 const CONSTANTS = {
     // Application settings
-    APP_NAME: 'MVC Application',
+    APP_NAME: 'Curated Collection',
     APP_VERSION: '1.0.0',
     
     // Local storage keys
@@ -41,3 +41,5 @@ const CONSTANTS = {
 
 // Freeze the constants object to prevent modifications
 Object.freeze(CONSTANTS);
+
+window.CONSTANTS = CONSTANTS;

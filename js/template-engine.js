@@ -1,6 +1,7 @@
 /**
- * Simple template engine with data binding
+ * Template Engine Module
  */
+// eslint-disable-next-line no-unused-vars
 const TemplateEngine = (function() {
     'use strict';
   
@@ -53,39 +54,3 @@ const TemplateEngine = (function() {
         }
     };
 })();
-
-// Find your artwork template function
-
-// Example of how to fix the artwork template function
-const artworkTemplate = artwork => {
-    // Ensure there's always an ID
-    const safeId = artwork.id || `artwork-fallback-${Math.random().toString(36).substring(2, 9)}`;
-    
-    // For debugging only - log what we're rendering
-    if (!artwork.id) {
-        console.warn('Missing ID for artwork:', artwork.title);
-    }
-    
-    return `
-        <div class="artwork" data-id="${safeId}">
-            <div class="artwork-image-container">
-                <img 
-                    class="artwork-image loading-image" 
-                    src="./images/placeholder.svg" 
-                    data-src="${artwork.imagePath || './images/placeholder.svg'}" 
-                    alt="${artwork.title} by ${artwork.artist}"
-                    loading="eager"
-                >
-                <div class="loading-indicator">
-                    <div class="spinner"></div>
-                </div>
-            </div>
-            <!-- Rest of your template -->
-            <div class="artwork-details">
-                <h3 class="artwork-title">${artwork.title}</h3>
-                <p class="artwork-artist">${artwork.artist}</p>
-                <!-- Additional details as needed -->
-            </div>
-        </div>
-    `;
-};

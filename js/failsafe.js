@@ -1,8 +1,10 @@
-/**
- * Failsafe module for error handling and recovery
- * Provides mechanisms to handle errors gracefully and maintain app functionality
- */
+/* global CONSTANTS, Utils */
 
+/**
+ * Failsafe Module
+ * Provides error handling and fallback mechanisms.
+ */
+// eslint-disable-next-line no-unused-vars
 const Failsafe = (function() {
     'use strict';
     
@@ -84,9 +86,9 @@ const Failsafe = (function() {
             try {
                 // Only clear app-specific data, not all localStorage
                 localStorage.removeItem(CONSTANTS.STORAGE_KEY);
-            } catch (e) {
-                // Intentionally empty: we're testing feature availability
-                // and silently falling back to alternatives
+            } catch (_e) {
+                // Using void to indicate intentional non-use
+                void _e;
                 return false;
             }
             
@@ -104,9 +106,8 @@ const Failsafe = (function() {
                 localStorage.setItem(testKey, testKey);
                 localStorage.removeItem(testKey);
                 return true;
-            } catch (e) {
-                // Intentionally empty: we're testing feature availability
-                // and silently falling back to alternatives
+            } catch (_e) {
+                void _e; // Acknowledge intentional non-use
                 return false;
             }
         },
@@ -185,9 +186,8 @@ const Failsafe = (function() {
                 
                 errorLog.push(errorInfo);
                 localStorage.setItem('errorLog', JSON.stringify(errorLog));
-            } catch (e) {
-                // Intentionally empty: we're testing feature availability
-                // and silently falling back to alternatives
+            } catch (_e) {
+                void _e; // Acknowledge intentional non-use
                 return false;
             }
             
@@ -240,42 +240,73 @@ const Failsafe = (function() {
 (function suppressOfflineWarnings() {
     // Force online status
     Object.defineProperty(navigator, 'onLine', {
-        get: function() { return true; },
+        get: function() {
+            return true; 
+        },
         configurable: true
     });
     
     // Capture and block offline events
-    window.addEventListener('offline', function(e) {
-        e.stopImmediatePropagation();
-        e.preventDefault();
+    window.addEventListener('offline', function(_e) {
+        _e.stopImmediatePropagation();
+        _e.preventDefault();
         return false;
     }, true);
     
     // Find and remove offline messages periodically
     function removeOfflineMessages() {
-        // Common selectors for offline messages
-        const possibleOfflineElements = document.querySelectorAll('[class*="offline"], [id*="offline"], [aria-label*="offline"], [data-*="offline"]');
+        // Use more specific selectors instead of checking all elements
+        const possibleOfflineElements = document.querySelectorAll('.offline-indicator, [class*="offline-message"]');
         possibleOfflineElements.forEach(el => {
             if (el.parentNode) {
                 el.style.display = 'none';
             }
         });
         
-        // Find elements with offline text
-        document.querySelectorAll('body *').forEach(el => {
-            if (el.childNodes && el.childNodes.length > 0) {
-                for (let i = 0; i < el.childNodes.length; i++) {
-                    const node = el.childNodes[i];
-                    if (node.nodeType === 3 && node.nodeValue && node.nodeValue.toLowerCase().includes('offline')) {
-                        const parent = node.parentNode;
-                        if (parent) parent.style.display = 'none';
-                    }
-                }
-            }
-        });
+        // Run less frequently - increase to 30 seconds
+        setTimeout(removeOfflineMessages, 30000);
     }
     
-    // Run immediately and then every 2 seconds
+    // Run once, then use setTimeout instead of setInterval
     removeOfflineMessages();
-    setInterval(removeOfflineMessages, 2000);
 })();
+
+/**
+ * Setup watchdog to monitor application health
+ */
+function setupWatchdog() {
+    // Use a more reasonable interval (at least 1000ms)
+    const watchdogInterval = setInterval(() => {
+        // Schedule the actual check during idle time
+        if (window.requestIdleCallback) {
+            requestIdleCallback(() => {
+                checkApplicationHealth();
+            }, { timeout: 10000 });
+        } else {
+            // Fallback to lightweight check if requestIdleCallback isn't available
+            const startTime = performance.now();
+            
+            // Only do the full check if we have time
+            if (performance.now() - startTime < 10) {
+                checkApplicationHealth();
+            } else {
+                // Do minimal check to avoid freezing the UI
+                const minimalCheck = getMinimalHealthCheck();
+                if (!minimalCheck.healthy) {
+                    console.warn('Minimal health check failed:', minimalCheck.reason);
+                }
+            }
+        }
+    }, 10000); // Increase interval to at least 2 seconds
+    
+    return watchdogInterval;
+}
+
+// Create a lightweight version of your health check
+function getMinimalHealthCheck() {
+    // Implement a very lightweight check that won't block the main thread
+    return {
+        healthy: document.getElementById('app-content') !== null,
+        reason: document.getElementById('app-content') ? 'OK' : 'Missing app-content element'
+    };
+}

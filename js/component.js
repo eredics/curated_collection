@@ -1,3 +1,5 @@
+/* global TemplateEngine */
+
 /**
  * Component system for creating reusable UI components
  */
