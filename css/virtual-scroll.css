@@ -1,41 +1,121 @@
 /* Styles for virtual scrolling */
 
+:root {
+  /* Virtual scroll specific variables */
+  --vs-header-height: 80px;
+  --vs-footer-height: 40px;
+  --vs-scrollbar-width: 8px;
+  --vs-scrollbar-track: var(--color-background-light, #f5f5f5);
+  --vs-scrollbar-thumb: var(--color-border-dark, #ddd);
+  --vs-scrollbar-thumb-hover: var(--color-text-lighter, #777);
+  --vs-container-padding: var(--spacing-md, 1rem);
+}
+
 /* Main container */
 .gallery-container {
-    height: calc(100vh - 120px); /* Adjust based on your layout */
-    overflow: hidden auto;
-    position: relative;
-    contain: strict; /* CSS containment for better performance */
+  /* Use CSS variables for flexible height calculation */
+  height: calc(100vh - var(--vs-header-height) - var(--vs-footer-height));
+  overflow: hidden auto;
+  position: relative;
+  contain: strict; /* CSS containment for better performance */
+  padding: var(--vs-container-padding);
+  background-color: var(--color-background, #f9f9f9);
+  
+  /* Add scrollbar properties here from the duplicate selector */
+  scrollbar-width: thin;
+  scrollbar-color: var(--vs-scrollbar-thumb) var(--vs-scrollbar-track);
 }
 
 /* Gallery items container */
 .gallery-items {
-    width: 100%;
-    position: relative;
+  width: 100%;
+  position: relative;
 }
 
-/* Artwork items when using virtual scrolling */
-.gallery-items .artwork {
-    position: absolute;
-    width: 100%;
-    box-sizing: border-box;
-    transition: none !important; /* Disable transitions when using virtual scrolling */
+/* Virtual scrolling artwork items - increased specificity to avoid !important */
+.gallery-container .gallery-items .artwork,
+.gallery-container.virtual-scroll .artwork {
+  position: absolute;
+  width: var(--gallery-item-width, 220px);
+  height: var(--gallery-item-height, 240px);
+  box-sizing: border-box;
+
+  /* More specific selector instead of !important */
+  transition: none;
+
+  /* Add other standard properties from styles.css */
+  border: 1px solid var(--color-border-dark, #ddd);
+  border-radius: var(--border-radius-sm, 4px);
+  background-color: var(--color-background-light, #f5f5f5);
 }
 
-/* Fast-moving scrollbar styling */
+/* Artwork content positioning */
+.gallery-container .gallery-items .artwork .artwork-image-container {
+  width: 100%;
+  height: calc(100% - 20px); /* Adjust for details height */
+  overflow: hidden;
+}
+
+/* Custom scrollbar styling */
 .gallery-container::-webkit-scrollbar {
-    width: 8px;
+  width: var(--vs-scrollbar-width);
 }
 
 .gallery-container::-webkit-scrollbar-track {
-    background: #f1f1f1;
+  background: var(--vs-scrollbar-track);
+  border-radius: calc(var(--vs-scrollbar-width) / 2);
 }
 
 .gallery-container::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 4px;
+  background: var(--vs-scrollbar-thumb);
+  border-radius: calc(var(--vs-scrollbar-width) / 2);
 }
 
 .gallery-container::-webkit-scrollbar-thumb:hover {
-    background: #666;
+  background: var(--vs-scrollbar-thumb-hover);
+}
+
+/* Performance optimizations */
+.gallery-container.scrolling * {
+  pointer-events: none; /* Disable pointer events during scrolling for better performance */
+}
+
+/* Responsive adjustments */
+@media (width <= 768px) {
+  :root {
+    --vs-header-height: 60px;
+    --vs-footer-height: 30px;
+  }
+  
+  .gallery-container {
+    height: calc(100vh - var(--vs-header-height) - var(--vs-footer-height));
+  }
+}
+
+@media (width <= 480px) {
+  :root {
+    /* Adjust variables for mobile */
+    --vs-header-height: 50px;
+    --vs-container-padding: var(--spacing-sm, 0.5rem);
+  }
+  
+  .gallery-container {
+    height: calc(100vh - var(--vs-header-height) - var(--vs-footer-height));
+
+    /* Enable regular scrolling on mobile */
+    overflow-y: auto;
+  }
+  
+  /* Switch to regular layout on very small screens where virtual scrolling may not be needed */
+  .gallery-container .gallery-items .artwork,
+  .gallery-container.virtual-scroll .artwork {
+    position: relative;
+    margin-bottom: var(--gallery-item-gap, 8px);
+  }
+  
+  .gallery-items {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
 }

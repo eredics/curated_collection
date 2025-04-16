@@ -1,5 +1,24 @@
 /* Data Loading and Error Styles */
 
+:root {
+  /* Colors */
+  --color-primary: #3498db;
+  --color-primary-dark: #2980b9;
+  --color-error: #e74c3c;
+  --color-text: #333;
+  --color-background-light: #f5f5f5;
+  --color-border-light: rgb(0 0 0 / 10%);
+  
+  /* Timing */
+  --transition-fast: 0.2s ease;
+  --transition-medium: 0.3s ease;
+  --transition-slow: 0.5s ease;
+  
+  /* Sizes */
+  --spinner-large: 50px;
+  --spinner-small: 30px;
+}
+
 /* Loading Container */
 .data-loading-container {
     display: flex;
@@ -13,7 +32,7 @@
     margin: 0 auto;
     text-align: center;
     opacity: 1;
-    transition: opacity 0.5s ease;
+    transition: opacity var(--transition-slow);
 }
 
 .data-loading-container.fade-out {
@@ -22,11 +41,11 @@
 
 /* Spinner */
 .data-loading-spinner {
-    width: 50px;
-    height: 50px;
-    border: 4px solid rgb(0 0 0 / 10%);
+    width: var(--spinner-large);
+    height: var(--spinner-large);
+    border: 4px solid var(--color-border-light);
     border-radius: 50%;
-    border-top-color: #3498db;
+    border-top-color: var(--color-primary);
     animation: spinner 1s linear infinite;
     margin-bottom: 1rem;
 }
@@ -38,7 +57,7 @@
 /* Loading Text */
 .data-loading-text {
     font-size: 1.1rem;
-    color: #333;
+    color: var(--color-text);
     margin-bottom: 1rem;
 }
 
@@ -54,8 +73,8 @@
 .data-loading-progress-bar {
     height: 100%;
     width: 0%;
-    background-color: #3498db;
-    transition: width 0.3s ease;
+    background-color: var(--color-primary);
+    transition: width var(--transition-medium);
 }
 
 /* Error Container */
@@ -69,17 +88,12 @@
     max-width: 500px;
     margin: 0 auto;
     text-align: center;
-    animation: error-fade-in 0.3s ease;
+    animation: error-fade-in var(--transition-medium);
 }
 
 @keyframes error-fade-in { 
-  from { 
-    opacity: 0; 
-  } 
-
-  to { 
-    opacity: 1; 
-  } 
+  from { opacity: 0; } 
+  to { opacity: 1; } 
 }
 
 /* Error Icon */
@@ -91,26 +105,30 @@
 /* Error Message */
 .data-error-message {
     font-size: 1.1rem;
-    color: #e74c3c;
+    color: var(--color-error);
     margin-bottom: 1.5rem;
     line-height: 1.5;
+}
+
+.error-message {
+  animation: error-fade-in var(--transition-medium) forwards;
 }
 
 /* Retry Button */
 .data-error-retry {
     padding: 0.75rem 1.5rem;
-    background-color: #3498db;
+    background-color: var(--color-primary);
     color: white;
     border: none;
     border-radius: 4px;
     font-size: 1rem;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: background-color var(--transition-fast);
 }
 
 .data-error-retry:hover, 
 .data-error-retry:focus {
-    background-color: #2980b9;
+    background-color: var(--color-primary-dark);
     outline: none;
 }
 
@@ -118,21 +136,15 @@
     transform: scale(0.98);
 }
 
-.error-message {
-  animation: error-fade-in 0.3s ease-in forwards;
-}
-
-/* Replace or update your loading states CSS */
-
 /* Artwork container loading state */
 .artwork {
-  transition: opacity 0.3s ease;
+  transition: opacity var(--transition-medium);
 }
 
 /* Image loading states */
 .artwork-image-container {
   position: relative;
-  background-color: #f5f5f5;
+  background-color: var(--color-background-light);
   overflow: hidden;
 }
 
@@ -143,21 +155,34 @@
   height: auto;
   aspect-ratio: 1 / 1;
   object-fit: cover;
-  transition: opacity 0.3s ease;
+  transition: opacity var(--transition-medium);
+
+  /* Fallback for browsers that don't support aspect-ratio */
+  position: relative;
+  padding-bottom: 100%; /* 1:1 aspect ratio fallback */
 }
 
-/* Image loading state */
-.artwork-image.loading-image {
+/* Actual image for browsers that support aspect-ratio */
+@supports (aspect-ratio: 1 / 1) {
+  .artwork-image {
+    padding-bottom: 0;
+    height: auto;
+  }
+}
+
+/* Standardized class naming pattern */
+.artwork-image.image-loading,
+.artwork-image.loading-image { /* Support both patterns during transition */
   opacity: 0.2;
 }
 
-/* Image loaded state */
-.artwork-image.loaded {
+.artwork-image.image-loaded,
+.artwork-image.loaded { /* Support both patterns during transition */
   opacity: 1;
 }
 
-/* Image error state */
-.artwork-image.error {
+.artwork-image.image-error,
+.artwork-image.error { /* Support both patterns during transition */
   opacity: 0.5;
   filter: grayscale(100%);
 }
@@ -174,17 +199,19 @@
 }
 
 /* Hide loading indicator when image loaded */
+.artwork-image.image-loaded + .loading-indicator,
 .artwork-image.loaded + .loading-indicator,
+.artwork-image.image-error + .loading-indicator,
 .artwork-image.error + .loading-indicator {
   display: none;
 }
 
 /* Spinner animation */
 .spinner {
-  width: 30px;
-  height: 30px;
-  border: 3px solid rgb(0 0 0 / 10%);
-  border-top-color: #3498db;
+  width: var(--spinner-small);
+  height: var(--spinner-small);
+  border: 3px solid var(--color-border-light);
+  border-top-color: var(--color-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }

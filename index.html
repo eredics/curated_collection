@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- Content Security Policy -->
+    <!-- Content Security Policy - UPDATED script-src -->
     <meta http-equiv="Content-Security-Policy" content="
         default-src 'self';
-        script-src 'self' 'unsafe-inline';
+        script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com;
         style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
         font-src 'self' https://fonts.gstatic.com;
         img-src 'self' data:;
@@ -24,19 +24,11 @@
     <title>Curated Collection</title>
     <!-- Add manifest for PWA -->
     <link rel="manifest" href="manifest.json">
-    <!-- Link to our stylesheet -->
     <link rel="stylesheet" href="css/styles.css">
-    <!-- Add this in the head section -->
     <link rel="stylesheet" href="css/loading-states.css">
-    <!-- Add these in the head section -->
     <link rel="preconnect" href="http://localhost:8000">
     <link rel="dns-prefetch" href="http://localhost:8000">
-    <!-- Add these to the head section -->
-    <link rel="stylesheet" href="css/filter-panel.css">
-    <!-- Add this in the head section -->
     <meta http-equiv="origin-trial" content="AvoidLazyLoadingImagesOptOut">
-
-    <!-- Replace all the style tags in your head section with this single consolidated one -->
 
     <style>
       /* Critical gallery styles - kept inline for reliability */
@@ -76,46 +68,6 @@
         </header>
         <main id="app-content" role="main">
             <div class="content-layout">
-                <!-- Filter controls -->
-                <div class="filter-controls">
-                    <button id="filter-toggle" class="filter-toggle-btn" aria-expanded="false">
-                        <span class="filter-icon">⚙️</span> Filter
-                    </button>
-                </div>
-                
-                <!-- Filter panel -->
-                <aside id="filter-panel" class="filter-panel collapsed" aria-label="Artwork filters">
-                    <h2>Filter Artworks</h2>
-                    
-                    <div class="filter-group">
-                        <h3>Artist</h3>
-                        <ul id="artist-filters" class="filter-list">
-                            <li class="filter-loading">Loading artists...</li>
-                        </ul>
-                    </div>
-                    
-                    <div class="filter-group">
-                        <h3>Technique</h3>
-                        <ul id="technique-filters" class="filter-list">
-                            <li class="filter-loading">Loading techniques...</li>
-                        </ul>
-                    </div>
-                    
-                    <div class="filter-group">
-                        <h3>Price Range</h3>
-                        <div class="price-range">
-                            <div class="price-inputs">
-                                <label>Min: $<input type="number" id="price-min" class="price-input" placeholder="0"></label>
-                                <label>Max: $<input type="number" id="price-max" class="price-input" placeholder="10000"></label>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="filter-actions">
-                        <button id="apply-filters" class="filter-button">Apply Filters</button>
-                        <button id="reset-filters" class="filter-button filter-reset">Reset</button>
-                    </div>
-                </aside>
                 
                 <!-- Gallery container -->
                 <div id="gallery-container" class="gallery-container">
@@ -128,21 +80,21 @@
     <!-- Screen reader announcer -->
     <div id="sr-announcer" class="sr-only" aria-live="polite"></div>
     
+    <!-- Add this BEFORE data-loader.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <!-- OR -->
+    <!-- <script src="lib/papaparse.min.js"></script> --> <!-- If downloaded locally -->
+
     <!-- Load dependencies FIRST -->
-    <script src="js/libs/papaparse.min.js"></script>
-    <script src="js/constants.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/failsafe.js"></script>
-    <script src="js/storage.js"></script>
-    <script src="js/template-engine.js"></script>
-    <script src="js/dataModel.js"></script>
-    <script src="js/dataController.js"></script>
-    <script src="js/data-loader.js"></script>
-    <script src="js/image-handler.js"></script>
-    <script src="js/filter.js"></script>
+    <script src="js/data-loader.js"></script> <!-- REMOVED defer attribute -->
+
+    <!-- Make sure this is before any script that uses Controller -->
+    <script src="js/controller.js"></script>
+
+    <!-- Then your other scripts -->
+    <script src="js/component.js"></script>
     <script src="js/virtual-scroll.js"></script>
-    <script src="js/data-binding.js"></script>
-    <script src="js/main.js"></script>
+    <!-- etc. -->
 
     <!-- Consolidated initialization script -->
     <script>
@@ -179,75 +131,25 @@
             
             console.log('=== END DEBUG INFO ===');
         };
-        
-        // Single application initialization
+
+        // Wait for everything to load before initializing
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM content loaded, initializing application');
-            console.log('VirtualScroll loaded at initialization:', typeof VirtualScroll !== 'undefined');
-            
-            // Check gallery container exists
-            const galleryExists = !!document.getElementById('gallery-container');
-            console.log('Gallery container in DOM:', galleryExists);
-            
-            // Splash screen handling
-            const splashScreen = document.getElementById('splash-screen');
-            
-            // Initialize controller function
-            function initController() {
-                if (typeof Controller !== 'undefined' && Controller.init) {
-                    console.log('Initializing Controller');
-                    Controller.init();
-                } else {
-                    console.error('Controller not found. Check script loading order.');
-                }
-            }
-            
-            function debugDOMStructure() {
-                console.log('Checking DOM structure before initialization');
-                
-                const app = document.getElementById('app');
-                const appContent = document.getElementById('app-content');
-                const contentLayout = document.querySelector('.content-layout');
-                const galleryContainer = document.getElementById('gallery-container');
-                
-                console.log('Key elements check:');
-                console.log('- app:', !!app);
-                console.log('- app-content:', !!appContent);
-                console.log('- content-layout:', !!contentLayout);
-                console.log('- gallery-container:', !!galleryContainer);
-            }
-            
-            if (splashScreen) {
-                // Update splash screen date
-                const dateElement = document.getElementById('splash-date');
-                if (dateElement) {
-                    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-                    dateElement.textContent = new Date().toLocaleDateString(undefined, options);
-                }
-                
-                // Hide splash after delay
-                setTimeout(() => {
-                    splashScreen.classList.add('hidden');
+            // Make sure Controller exists
+            if (window.Controller || (window.ArtGallery && window.ArtGallery.Controller)) {
+                const ControllerModule = window.ArtGallery ? 
+                    window.ArtGallery.Controller : 
+                    window.Controller;
                     
-                    // Initialize after splash fade
-                    setTimeout(() => {
-                        if (splashScreen.parentNode) {
-                            splashScreen.parentNode.removeChild(splashScreen);
-                        }
-                        
-                        debugDOMStructure();
-                        initController();
-                    }, 500);
-                }, 1500);
+                console.log('Initializing application controller...');
+                
+                // ONLY initialize the controller - it will handle VirtualScroll initialization
+                ControllerModule.init();
             } else {
-                // No splash, init immediately
-                debugDOMStructure();
-                initController();
+                console.error('Controller not found. Check script loading order.');
             }
         });
     </script>
 
-    <!-- Replace both scroll detection scripts with this single version -->
 <script>
   // Single consolidated infinite scroll detection
   (function() {
@@ -275,10 +177,6 @@
     setTimeout(checkForMoreContent, 1500); // Give VirtualScroll time to potentially initialize
     setTimeout(checkForMoreContent, 3000); // Another check later
 
-    // --- REMOVE OR COMMENT OUT THIS LINE ---
-    // setInterval(checkForMoreContent, 5000); // Periodic check is likely redundant and potentially costly if forceLoad is slow
-    // --- END REMOVAL ---
-
     // Efficient scroll listener with debounce
     let scrollTimeout;
     window.addEventListener('scroll', function() {
@@ -303,6 +201,14 @@
     });
 
   })();
+</script>
+
+<script>
+  // Initialize Failsafe system
+  if (typeof Failsafe !== 'undefined' && Failsafe.init) {
+    console.log('Initializing Failsafe system');
+    Failsafe.init();
+  }
 </script>
 
 </body>
